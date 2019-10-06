@@ -11,11 +11,13 @@ public:
     NNExecutor(string cgo_file_name);
     ~NNExecutor();
 
-    void set_input_nocopy(float *in);
-    void get_output_copy(float *out);
+    void copy_input_data(char *in, int &size);
+    void copy_output_data(char *out, int &size);
     void run(void);
 private:
+    int    _input_size;
     float *_input;
+    int    _output_size;
     float *_output;
 };
 

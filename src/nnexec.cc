@@ -11,10 +11,10 @@ NNExecutor::NNExecutor(string cgo_file_name) {
 NNExecutor::~NNExecutor(void) {
 }
 
-void NNExecutor::set_input_nocopy(float *in) {
+void NNExecutor::copy_input_data(char *in, int &size) {
 }
 
-void NNExecutor::get_output_copy(float *out) {
+void NNExecutor::copy_output_data(char *out, int &size) {
 }
 
 void NNExecutor::run(void) {

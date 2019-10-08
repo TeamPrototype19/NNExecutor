@@ -10,7 +10,7 @@ file(GLOB SRCS
 	"${CMAKE_CURRENT_SOURCE_DIR}/src/builtin-kernels/*.cc"
 )
 set(CMAKE_CXX_FLAGS "--std=c++11 -fsigned-char -Wall -Wno-comment -g")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
+#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
 
 add_custom_command (
 	OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/inc/instPacket_generated.h"

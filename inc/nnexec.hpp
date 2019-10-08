@@ -1,6 +1,8 @@
 #include <iostream>
+#include <fstream>
 
 #include "log.h"
+#include "instPacket_generated.h"
 
 using namespace std;
 
@@ -19,6 +21,9 @@ private:
     float *_input;
     int    _output_size;
     float *_output;
+    char  *_cgo_buf;
+    int    _cgo_buf_size;
+    const NNFramework::InstPacket* cgo;
 };
 
 }

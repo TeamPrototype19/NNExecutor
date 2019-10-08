@@ -14,7 +14,7 @@ void writeBinaryData(char* buf, int &size, std::string filename);
 
 int main(int argc, char **argv) {
 	char option;
-	const char *optstring = "p:";
+	const char *optstring = "p:i:o:";
 
     open_log_file("log.txt");
 

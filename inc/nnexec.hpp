@@ -2,6 +2,7 @@
 #include <fstream>
 
 #include "log.h"
+#include "kernel.hpp"
 #include "instPacket_generated.h"
 
 using namespace std;

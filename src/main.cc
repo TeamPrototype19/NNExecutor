@@ -46,20 +46,25 @@ int main(int argc, char **argv) {
     logfs << "Input  file path = " << inputFileName << "\n";
     logfs << "Output file path = " << outputFileName << "\n";
 
-    /* Open Input/Output file name
-     */
-    char *ibuf = nullptr, *obuf = nullptr;
-    int ibsize, obsize;
+    try {
+        /* Open Input/Output file name
+         */
+        char *ibuf = nullptr, *obuf = nullptr;
+        int ibsize, obsize;
 
-    NNFramework::NNExecutor nne( packetFileName );
+        NNFramework::NNExecutor nne( packetFileName );
 
-    readBinaryData( ibuf, ibsize, inputFileName );
-    nne.copy_input_data( ibuf, ibsize );
+        readBinaryData( ibuf, ibsize, inputFileName );
+        nne.copy_input_data( ibuf, ibsize );
 
-    nne.run();
+        nne.run();
 
-    nne.copy_output_data( obuf, obsize );
-    writeBinaryData( obuf, obsize, outputFileName );
+        nne.copy_output_data( obuf, obsize );
+        writeBinaryData( obuf, obsize, outputFileName );
+    }
+    catch (const exception& e) {
+        cout << "Program receives exception. Program will be terminated.\n";
+    }
 
 
     close_log_file();

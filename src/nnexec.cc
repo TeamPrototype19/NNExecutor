@@ -48,8 +48,24 @@ void NNExecutor::run(void) {
     auto packets = cgo->packet();
     auto packet_size = packets->Length();
     for(unsigned int i = 0 ; i < packet_size ; i++) {
+        /* Get 'Instruction' data
+         */
         auto inst = packets->Get(i);
         auto opcode = inst->opcode();
+
+        /* Get Kernel handler for the Instruction.OpCode
+         */
+        if( KernelList.find( opcode ) == KernelList.end() ) {
+            cerr << "Instruction number = " << i << "'th\n";
+            cerr << "           .opcode = " << opcode << "\n";
+            throw runtime_error("[ERROR] Unknown instruction opcode.");
+        }
+            
+        cout << "opcode is " << opcode << "\n";
+        Kernel* khandler = KernelList[ opcode ];
+        khandler->Run( inst );
+
+        /*
         if( opcode == OpCode_Input ) {
             cout << "opcode is Input type.\n";
         }
@@ -71,6 +87,7 @@ void NNExecutor::run(void) {
         else {
             cout << "opcode is unknown type.\n";
         }
+        */
     }
 }
 

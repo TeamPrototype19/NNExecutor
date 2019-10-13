@@ -10,11 +10,12 @@ public:
     ~Kernel_nn_memfree();
 
     int GetOpCode(void) override;
-    int preProc(void) override;
+    int preProc( const Instruction * ) override;
     int postProc(void) override;
-    int Run(const Instruction *) override;
+    int Run( RunContext &rcontext ) override;
 
 private:
+    string _kernel_name;
     int decode_fb_data(const MemFree *);
 };
 

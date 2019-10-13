@@ -18,7 +18,12 @@ int Kernel_nn_conv::GetOpCode(void) {
     return OpCode_Convolution;
 }
 
-int Kernel_nn_conv::preProc(void) {
+int Kernel_nn_conv::preProc( const Instruction *inst ) {
+    auto convinfo = inst->operand_as_Conv();
+
+    // DEBUG
+    decode_fb_data( convinfo );
+
     return 0;
 }
 
@@ -26,12 +31,7 @@ int Kernel_nn_conv::postProc(void) {
     return 0;
 }
 
-int Kernel_nn_conv::Run(const Instruction *inst) {
-    auto convinfo = inst->operand_as_Conv();
-
-    // DEBUG
-    decode_fb_data( convinfo );
-
+int Kernel_nn_conv::Run( RunContext &rcontext ) {
     return 0;
 }
 

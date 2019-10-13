@@ -18,7 +18,11 @@ int Kernel_nn_relu::GetOpCode(void) {
     return OpCode_Relu;
 }
 
-int Kernel_nn_relu::preProc(void) {
+int Kernel_nn_relu::preProc( const Instruction *inst ) {
+    auto convinfo = inst->operand_as_Relu();
+
+    decode_fb_data( convinfo );
+
     return 0;
 }
 
@@ -26,12 +30,7 @@ int Kernel_nn_relu::postProc(void) {
     return 0;
 }
 
-int Kernel_nn_relu::Run(const Instruction *inst) {
-    auto convinfo = inst->operand_as_Relu();
-
-    // DEBUG
-    decode_fb_data( convinfo );
-
+int Kernel_nn_relu::Run( RunContext &rcontext) {
     return 0;
 }
 

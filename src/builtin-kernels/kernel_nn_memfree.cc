@@ -18,7 +18,10 @@ int Kernel_nn_memfree::GetOpCode(void) {
     return OpCode_MemFree;
 }
 
-int Kernel_nn_memfree::preProc(void) {
+int Kernel_nn_memfree::preProc( const Instruction *inst ) {
+    auto opinfo = inst->operand_as_MemFree();
+    decode_fb_data( opinfo );
+
     return 0;
 }
 
@@ -26,19 +29,20 @@ int Kernel_nn_memfree::postProc(void) {
     return 0;
 }
 
-int Kernel_nn_memfree::Run(const Instruction *inst) {
-    auto opinfo = inst->operand_as_MemFree();
-
-    // DEBUG
-    decode_fb_data( opinfo );
+int Kernel_nn_memfree::Run( RunContext &rcontext ) {
+    delete [] rcontext.main_buffer;
 
     return 0;
 }
 
 int Kernel_nn_memfree::decode_fb_data(const MemFree *opinfo) {
+    _kernel_name = opinfo->kernel_name()->c_str();
+
+#if LOG_LEVEL > 1
     logfs << "-------- Kernel_opinfo fb data decode result --------\n";
-    logfs << "name           = " << opinfo->kernel_name()->c_str() << "\n";
+    logfs << "name           = " << _kernel_name << "\n";
     logfs << "\n";
+#endif
     
     return 0;
 }

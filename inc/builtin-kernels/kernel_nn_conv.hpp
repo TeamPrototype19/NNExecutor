@@ -10,9 +10,9 @@ public:
     ~Kernel_nn_conv();
 
     int GetOpCode(void) override;
-    int preProc(void) override;
+    int preProc( const Instruction * ) override;
     int postProc(void) override;
-    int Run(const Instruction *) override;
+    int Run( RunContext &rcontext ) override;
 
 private:
     int decode_fb_data(const Conv *);

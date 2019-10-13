@@ -3,6 +3,7 @@
 #include <stdexcept>
 
 #include "instPacket_generated.h"
+#include "rcontext.hpp"
 
 namespace NNFramework {
 
@@ -21,9 +22,9 @@ public:
     virtual ~Kernel() = default;
 
     virtual int GetOpCode(void) = 0;
-    virtual int preProc(void) = 0;
+    virtual int preProc( const Instruction* ) = 0;
     virtual int postProc(void) = 0;
-    virtual int Run(const Instruction*) = 0;
+    virtual int Run( RunContext &rcontext ) = 0;
 
 private:
 };

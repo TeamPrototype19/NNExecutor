@@ -18,7 +18,10 @@ int Kernel_nn_memalloc::GetOpCode(void) {
     return OpCode_MemAlloc;
 }
 
-int Kernel_nn_memalloc::preProc(void) {
+int Kernel_nn_memalloc::preProc( const Instruction *inst ) {
+    auto opinfo = inst->operand_as_MemAlloc();
+    decode_fb_data( opinfo );
+
     return 0;
 }
 
@@ -26,20 +29,22 @@ int Kernel_nn_memalloc::postProc(void) {
     return 0;
 }
 
-int Kernel_nn_memalloc::Run(const Instruction *inst) {
-    auto opinfo = inst->operand_as_MemAlloc();
-
-    // DEBUG
-    decode_fb_data( opinfo );
+int Kernel_nn_memalloc::Run( RunContext &rcontext ) {
+    rcontext.main_buffer = new char [ _total_buff_size ];
 
     return 0;
 }
 
 int Kernel_nn_memalloc::decode_fb_data(const MemAlloc *opinfo) {
+    _kernel_name = opinfo->kernel_name()->c_str();
+    _total_buff_size = opinfo->total_buff_size();
+
+#if LOG_LEVEL > 1
     logfs << "-------- Kernel_opinfo fb data decode result --------\n";
-    logfs << "name           = " << opinfo->kernel_name()->c_str() << "\n";
-    logfs << "total_buf_size = " << opinfo->total_buff_size() << "\n";
+    logfs << "name           = " << _kernel_name << "\n";
+    logfs << "total_buf_size = " << _total_buff_size << "\n";
     logfs << "\n";
+#endif
     
     return 0;
 }

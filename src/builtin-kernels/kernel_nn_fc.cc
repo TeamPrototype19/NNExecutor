@@ -18,7 +18,11 @@ int Kernel_nn_fc::GetOpCode(void) {
     return OpCode_FullyConnected;
 }
 
-int Kernel_nn_fc::preProc(void) {
+int Kernel_nn_fc::preProc( const Instruction *inst ) {
+    auto opinfo = inst->operand_as_FC();
+
+    decode_fb_data( opinfo );
+
     return 0;
 }
 
@@ -26,11 +30,7 @@ int Kernel_nn_fc::postProc(void) {
     return 0;
 }
 
-int Kernel_nn_fc::Run(const Instruction *inst) {
-    auto opinfo = inst->operand_as_FC();
-
-    // DEBUG
-    decode_fb_data( opinfo );
+int Kernel_nn_fc::Run( RunContext &rcontext ) {
 
     return 0;
 }

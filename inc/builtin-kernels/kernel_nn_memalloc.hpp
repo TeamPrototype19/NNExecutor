@@ -10,11 +10,13 @@ public:
     ~Kernel_nn_memalloc();
 
     int GetOpCode(void) override;
-    int preProc(void) override;
+    int preProc( const Instruction * ) override;
     int postProc(void) override;
-    int Run(const Instruction *) override;
+    int Run( RunContext &rcontext ) override;
 
 private:
+    string _kernel_name;
+    unsigned long _total_buff_size;
     int decode_fb_data(const MemAlloc *);
 };
 

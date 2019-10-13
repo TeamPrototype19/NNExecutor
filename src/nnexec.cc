@@ -1,4 +1,5 @@
 #include "nnexec.hpp"
+#include "rcontext.hpp"
 #include "log.h"
 
 using namespace std;
@@ -63,7 +64,9 @@ void NNExecutor::run(void) {
             
         logfs << "NNExecutor::run() opcode is " << opcode << "\n";
         Kernel* khandler = KernelList[ opcode ];
-        khandler->Run( inst );
+        khandler->preProc( inst );
+        khandler->Run( rcontext );
+        khandler->postProc();
     }
 }
 

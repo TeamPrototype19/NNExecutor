@@ -18,7 +18,11 @@ int Kernel_nn_output::GetOpCode(void) {
     return OpCode_Output;
 }
 
-int Kernel_nn_output::preProc(void) {
+int Kernel_nn_output::preProc( const Instruction *inst ) {
+    auto opinfo = inst->operand_as_Output();
+
+    decode_fb_data( opinfo );
+
     return 0;
 }
 
@@ -26,12 +30,7 @@ int Kernel_nn_output::postProc(void) {
     return 0;
 }
 
-int Kernel_nn_output::Run(const Instruction *inst) {
-    auto opinfo = inst->operand_as_Output();
-
-    // DEBUG
-    decode_fb_data( opinfo );
-
+int Kernel_nn_output::Run( RunContext &rcontext ) {
     return 0;
 }
 

@@ -18,7 +18,11 @@ int Kernel_nn_softmax::GetOpCode(void) {
     return OpCode_Softmax;
 }
 
-int Kernel_nn_softmax::preProc(void) {
+int Kernel_nn_softmax::preProc( const Instruction *inst ) {
+    auto opinfo = inst->operand_as_Softmax();
+
+    decode_fb_data( opinfo );
+
     return 0;
 }
 
@@ -26,12 +30,7 @@ int Kernel_nn_softmax::postProc(void) {
     return 0;
 }
 
-int Kernel_nn_softmax::Run(const Instruction *inst) {
-    auto opinfo = inst->operand_as_Softmax();
-
-    // DEBUG
-    decode_fb_data( opinfo );
-
+int Kernel_nn_softmax::Run( RunContext &rcontext ) {
     return 0;
 }
 

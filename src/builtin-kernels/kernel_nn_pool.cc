@@ -18,7 +18,11 @@ int Kernel_nn_pool::GetOpCode(void) {
     return OpCode_Pooling;
 }
 
-int Kernel_nn_pool::preProc(void) {
+int Kernel_nn_pool::preProc( const Instruction *inst ) {
+    auto opinfo = inst->operand_as_Pooling();
+
+    decode_fb_data( opinfo );
+
     return 0;
 }
 
@@ -26,12 +30,7 @@ int Kernel_nn_pool::postProc(void) {
     return 0;
 }
 
-int Kernel_nn_pool::Run(const Instruction *inst) {
-    auto opinfo = inst->operand_as_Pooling();
-
-    // DEBUG
-    decode_fb_data( opinfo );
-
+int Kernel_nn_pool::Run( RunContext &rcontext ) {
     return 0;
 }
 

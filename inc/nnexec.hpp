@@ -25,6 +25,7 @@ private:
     char  *_cgo_buf;
     int    _cgo_buf_size;
     const NNFramework::InstPacket* cgo;
+    RunContext rcontext;
 };
 
 }

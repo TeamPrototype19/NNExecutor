@@ -1,4 +1,5 @@
 #include "kernel_nn_conv.hpp"
+#include "log.h"
 
 #include <iomanip>
 
@@ -35,39 +36,40 @@ int Kernel_nn_conv::Run(const Instruction *inst) {
 }
 
 int Kernel_nn_conv::decode_fb_data(const Conv *conv) {
-    cout << "-------- Kernel_opinfo fb data decode result --------\n";
-    cout << "name           = " << conv->kernel_name()->c_str() << "\n";
-    cout << "kernel_size_w  = " << conv->kernel_size_w() << "\n";
-    cout << "kernel_size_h  = " << conv->kernel_size_h() << "\n";
-    cout << "stride_size_w  = " << conv->stride_size_w() << "\n";
-    cout << "stride_size_h  = " << conv->stride_size_h() << "\n";
-    cout << "pad_size_w     = " << conv->pad_size_w()    << "\n";
-    cout << "pad_size_h     = " << conv->pad_size_h()    << "\n";
-    cout << "weight_size    = " << conv->weight()->size() << "\n";
-    cout << "bias_size      = " << conv->bias()->size() << "\n";
-    cout << "*** tile info ***\n";
+    logfs << "-------- Kernel_opinfo fb data decode result --------\n";
+    logfs << "name           = " << conv->kernel_name()->c_str() << "\n";
+    logfs << "kernel_size_w  = " << conv->kernel_size_w() << "\n";
+    logfs << "kernel_size_h  = " << conv->kernel_size_h() << "\n";
+    logfs << "stride_size_w  = " << conv->stride_size_w() << "\n";
+    logfs << "stride_size_h  = " << conv->stride_size_h() << "\n";
+    logfs << "pad_size_w     = " << conv->pad_size_w()    << "\n";
+    logfs << "pad_size_h     = " << conv->pad_size_h()    << "\n";
+    logfs << "weight_size    = " << conv->weight()->size() << "\n";
+    logfs << "bias_size      = " << conv->bias()->size() << "\n";
+    logfs << "*** tile info ***\n";
     auto iti = conv->itile();
     for(unsigned int i = 0 ; i < iti->Length() ; i++) {
         auto ti = iti->Get(i);
-        cout << "Input tile info => " << i << "'th\n";
-        cout << "memory address = 0x" << setfill('0') << right << setw(8) << hex << ti->addr() << "\n";
-        cout << "tsize[n,c,h,w] = [";
-        cout << ti->tsize_n() << ",";
-        cout << ti->tsize_c() << ",";
-        cout << ti->tsize_h() << ",";
-        cout << ti->tsize_w() << "]\n";
+        logfs << "Input tile info => " << i << "'th\n";
+        logfs << "memory address = 0x" << setfill('0') << right << setw(8) << hex << ti->addr() << "\n";
+        logfs << "tsize[n,c,h,w] = [";
+        logfs << ti->tsize_n() << ",";
+        logfs << ti->tsize_c() << ",";
+        logfs << ti->tsize_h() << ",";
+        logfs << ti->tsize_w() << "]\n";
     }
     auto oti = conv->otile();
     for(unsigned int i = 0 ; i < oti->Length() ; i++) {
         auto ti = oti->Get(i);
-        cout << "Output tile info => " << i << "'th\n";
-        cout << "memory address = 0x" << setfill('0') << right << setw(8) << hex << ti->addr() << "\n";
-        cout << "tsize[n,c,h,w] = [";
-        cout << ti->tsize_n() << ",";
-        cout << ti->tsize_c() << ",";
-        cout << ti->tsize_h() << ",";
-        cout << ti->tsize_w() << "]\n";
+        logfs << "Output tile info => " << i << "'th\n";
+        logfs << "memory address = 0x" << setfill('0') << right << setw(8) << hex << ti->addr() << "\n";
+        logfs << "tsize[n,c,h,w] = [";
+        logfs << ti->tsize_n() << ",";
+        logfs << ti->tsize_c() << ",";
+        logfs << ti->tsize_h() << ",";
+        logfs << ti->tsize_w() << "]\n";
     }
+    logfs << "\n";
     
     return 0;
 }

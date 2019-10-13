@@ -1,41 +1,41 @@
-#include "kernel_nn_relu.hpp"
+#include "kernel_nn_softmax.hpp"
 #include "log.h"
 
 #include <iomanip>
 
 namespace NNFramework {
 
-Kernel_nn_relu kernel_nn_relu;
+Kernel_nn_softmax kernel_nn_softmax;
 
-Kernel_nn_relu::Kernel_nn_relu(void) : Kernel() {
+Kernel_nn_softmax::Kernel_nn_softmax(void) : Kernel() {
     REGISTER_KERNEL();
 }
 
-Kernel_nn_relu::~Kernel_nn_relu(void) {
+Kernel_nn_softmax::~Kernel_nn_softmax(void) {
 }
 
-int Kernel_nn_relu::GetOpCode(void) {
-    return OpCode_Relu;
+int Kernel_nn_softmax::GetOpCode(void) {
+    return OpCode_Softmax;
 }
 
-int Kernel_nn_relu::preProc(void) {
+int Kernel_nn_softmax::preProc(void) {
     return 0;
 }
 
-int Kernel_nn_relu::postProc(void) {
+int Kernel_nn_softmax::postProc(void) {
     return 0;
 }
 
-int Kernel_nn_relu::Run(const Instruction *inst) {
-    auto convinfo = inst->operand_as_Relu();
+int Kernel_nn_softmax::Run(const Instruction *inst) {
+    auto opinfo = inst->operand_as_Softmax();
 
     // DEBUG
-    decode_fb_data( convinfo );
+    decode_fb_data( opinfo );
 
     return 0;
 }
 
-int Kernel_nn_relu::decode_fb_data(const Relu *opinfo) {
+int Kernel_nn_softmax::decode_fb_data(const Softmax *opinfo) {
     logfs << "-------- Kernel_opinfo fb data decode result --------\n";
     logfs << "name           = " << opinfo->kernel_name()->c_str() << "\n";
     logfs << "*** tile info ***\n";

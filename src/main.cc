@@ -42,9 +42,9 @@ int main(int argc, char **argv) {
 		}
 	}
 
-    logfs << "Packet file path = " << packetFileName << "\n";
-    logfs << "Input  file path = " << inputFileName << "\n";
-    logfs << "Output file path = " << outputFileName << "\n";
+    cout << "Packet file path = " << packetFileName << "\n";
+    cout << "Input  file path = " << inputFileName << "\n";
+    cout << "Output file path = " << outputFileName << "\n";
 
     try {
         /* Open Input/Output file name
@@ -57,6 +57,7 @@ int main(int argc, char **argv) {
         readBinaryData( ibuf, ibsize, inputFileName );
         nne.copy_input_data( ibuf, ibsize );
 
+        cout << "Executing...\n";
         nne.run();
 
         nne.copy_output_data( obuf, obsize );
@@ -66,7 +67,7 @@ int main(int argc, char **argv) {
         cout << "Program receives exception. Program will be terminated.\n";
     }
 
-
+    cout << "Finished.\n";
     close_log_file();
 
 	return 0;

@@ -19,7 +19,7 @@ NNExecutor::NNExecutor(string cgo_file_name) {
     fbfile.seekg( 0, ios::end );
     _cgo_buf_size = fbfile.tellg();
     fbfile.seekg( 0, ios::beg );
-    cout << "'cgo' file size = " << _cgo_buf_size << "\n";
+    logfs << "NNExecutor::NNExecutor() 'cgo' file size = " << _cgo_buf_size << "\n";
 
     /* Read cgo flatbuffer data file
      * and parses the data file.
@@ -61,33 +61,9 @@ void NNExecutor::run(void) {
             throw runtime_error("[ERROR] Unknown instruction opcode.");
         }
             
-        cout << "opcode is " << opcode << "\n";
+        logfs << "NNExecutor::run() opcode is " << opcode << "\n";
         Kernel* khandler = KernelList[ opcode ];
         khandler->Run( inst );
-
-        /*
-        if( opcode == OpCode_Input ) {
-            cout << "opcode is Input type.\n";
-        }
-        else if( opcode == OpCode_Convolution ) {
-            cout << "opcode is Conv type.\n";
-        }
-        else if( opcode == OpCode_Relu ) {
-            cout << "opcode is Relu type.\n";
-        }
-        else if( opcode == OpCode_Pooling ) {
-            cout << "opcode is Pooling type.\n";
-        }
-        else if( opcode == OpCode_FullyConnected ) {
-            cout << "opcode is FC type.\n";
-        }
-        else if( opcode == OpCode_Softmax ) {
-            cout << "opcode is Softmax type.\n";
-        }
-        else {
-            cout << "opcode is unknown type.\n";
-        }
-        */
     }
 }
 

@@ -21,7 +21,6 @@ int Kernel_nn_conv::GetOpCode(void) {
 int Kernel_nn_conv::preProc( const Instruction *inst ) {
     auto convinfo = inst->operand_as_Conv();
 
-    // DEBUG
     decode_fb_data( convinfo );
 
     return 0;
@@ -32,73 +31,107 @@ int Kernel_nn_conv::postProc(void) {
 }
 
 int Kernel_nn_conv::Run( RunContext &rcontext ) {
+    float *input  = (float*)(rcontext.main_buffer + _itinfo[0].mem_addr);
+    float *output = (float*)(rcontext.main_buffer + _otinfo[0].mem_addr);
+
+    test_kernel_conv3d( output, input, (float*)_weight, (float*)_bias );
+
     return 0;
 }
 
 int Kernel_nn_conv::decode_fb_data(const Conv *conv) {
-    logfs << "-------- Kernel_opinfo fb data decode result --------\n";
-    logfs << "name           = " << conv->kernel_name()->c_str() << "\n";
-    logfs << "kernel_size_w  = " << conv->kernel_size_w() << "\n";
-    logfs << "kernel_size_h  = " << conv->kernel_size_h() << "\n";
-    logfs << "stride_size_w  = " << conv->stride_size_w() << "\n";
-    logfs << "stride_size_h  = " << conv->stride_size_h() << "\n";
-    logfs << "pad_size_w     = " << conv->pad_size_w()    << "\n";
-    logfs << "pad_size_h     = " << conv->pad_size_h()    << "\n";
-    logfs << "weight_size    = " << conv->weight()->size() << "\n";
-    logfs << "bias_size      = " << conv->bias()->size() << "\n";
-    logfs << "*** tile info ***\n";
+    _kernel_name = conv->kernel_name()->c_str();
+    _kernel_size_w = conv->kernel_size_w();
+    _kernel_size_h = conv->kernel_size_h();
+    _stride_size_w = conv->stride_size_w();
+    _stride_size_h = conv->stride_size_h();
+    _pad_size_w = conv->pad_size_w();
+    _pad_size_h = conv->pad_size_h();
+    _weight = conv->weight()->data();
+    _bias = conv->bias()->data();
+    _weight_size = conv->weight()->size();
+    _bias_size = conv->bias()->size();
+
     auto iti = conv->itile();
     for(unsigned int i = 0 ; i < iti->Length() ; i++) {
         auto ti = iti->Get(i);
-        logfs << "Input tile info => " << i << "'th\n";
-        logfs << "memory address = 0x" << setfill('0') << right << setw(8) << hex << ti->addr() << "\n";
-        logfs << "tsize[n,c,h,w] = [";
-        logfs << ti->tsize_n() << ",";
-        logfs << ti->tsize_c() << ",";
-        logfs << ti->tsize_h() << ",";
-        logfs << ti->tsize_w() << "]\n";
+        tileinfo_t t;
+        t.mem_addr = ti->addr();
+        t.dim.push_back( ti->tsize_n() );
+        t.dim.push_back( ti->tsize_c() );
+        t.dim.push_back( ti->tsize_h() );
+        t.dim.push_back( ti->tsize_w() );
+        _itinfo.push_back( t );
     }
+    
     auto oti = conv->otile();
     for(unsigned int i = 0 ; i < oti->Length() ; i++) {
         auto ti = oti->Get(i);
-        logfs << "Output tile info => " << i << "'th\n";
-        logfs << "memory address = 0x" << setfill('0') << right << setw(8) << hex << ti->addr() << "\n";
+        tileinfo_t t;
+        t.mem_addr = ti->addr();
+        t.dim.push_back( ti->tsize_n() );
+        t.dim.push_back( ti->tsize_c() );
+        t.dim.push_back( ti->tsize_h() );
+        t.dim.push_back( ti->tsize_w() );
+        _otinfo.push_back( t );
+    }
+
+
+    logfs << "-------- Kernel_opinfo fb data decode result --------\n";
+    logfs << "name           = " << _kernel_name << "\n";
+    logfs << "kernel_size_w  = " << _kernel_size_w << "\n";
+    logfs << "kernel_size_h  = " << _kernel_size_h << "\n";
+    logfs << "stride_size_w  = " << _stride_size_w << "\n";
+    logfs << "stride_size_h  = " << _stride_size_h << "\n";
+    logfs << "pad_size_w     = " << _pad_size_w    << "\n";
+    logfs << "pad_size_h     = " << _pad_size_h    << "\n";
+    logfs << "weight_size    = " << _weight_size << "\n";
+    logfs << "bias_size      = " << _bias_size << "\n";
+    logfs << "*** tile info ***\n";
+    for(unsigned int i = 0 ; i < _itinfo.size() ; i++) {
+        auto ti = _itinfo[i];
+        logfs << "Input tile info => " << i << "'th\n";
+        logfs << "memory address = 0x" << setfill('0') << right << setw(8) << hex << ti.mem_addr << dec << "\n";
         logfs << "tsize[n,c,h,w] = [";
-        logfs << ti->tsize_n() << ",";
-        logfs << ti->tsize_c() << ",";
-        logfs << ti->tsize_h() << ",";
-        logfs << ti->tsize_w() << "]\n";
+        logfs << ti.dim[0] << ",";
+        logfs << ti.dim[1] << ",";
+        logfs << ti.dim[2] << ",";
+        logfs << ti.dim[3] << "]\n";
+    }
+    for(unsigned int i = 0 ; i < _otinfo.size() ; i++) {
+        auto ti = _otinfo[i];
+        logfs << "Output tile info => " << i << "'th\n";
+        logfs << "memory address = 0x" << setfill('0') << right << setw(8) << hex << ti.mem_addr << dec << "\n";
+        logfs << "tsize[n,c,h,w] = [";
+        logfs << ti.dim[0] << ",";
+        logfs << ti.dim[1] << ",";
+        logfs << ti.dim[2] << ",";
+        logfs << ti.dim[3] << "]\n";
     }
     logfs << "\n";
     
     return 0;
 }
 
-}
 
-#if 0
-void test_kernel_conv3d(
-    // output
+void Kernel_nn_conv::test_kernel_conv3d(
     float *output,
-    // inputs
     float *input,
     float *weight,
-    float *bias,
-    // operation information
-    ConvInfo cinfo
+    float *bias
 ) {
 
-    int N = cinfo.ifmDim[0];
-    int C = cinfo.ifmDim[1];
-    int H = cinfo.ifmDim[2];
-    int W = cinfo.ifmDim[3];
-    int O = cinfo.output_num;
-    int KW = cinfo.kernel_size_w;
-    int KH = cinfo.kernel_size_h;
-    int SW = cinfo.stride_size_w;
-    int SH = cinfo.stride_size_h;
-    int PW = cinfo.pad_size_w;
-    int PH = cinfo.pad_size_h;
+    int N = _itinfo[0].dim[0];
+    int C = _itinfo[0].dim[1];
+    int H = _itinfo[0].dim[2];
+    int W = _itinfo[0].dim[3];
+    int O = _otinfo[0].dim[1];
+    int KW = _kernel_size_w;
+    int KH = _kernel_size_h;
+    int SW = _stride_size_w;
+    int SH = _stride_size_h;
+    int PW = _pad_size_w;
+    int PH = _pad_size_h;
 
     for(int n = 0 ; n < N ; n++) {
         float *bp = bias;
@@ -134,4 +167,5 @@ void test_kernel_conv3d(
     }
     }
 }
-#endif
+
+}

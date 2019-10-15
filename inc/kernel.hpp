@@ -16,6 +16,11 @@ namespace NNFramework {
     KernelList[ opcode ] = this;\
 }
 
+typedef struct _tileinfo_t {
+    unsigned long mem_addr;
+    vector<int> dim;
+} tileinfo_t;
+
 class Kernel {
 public:
     Kernel() {}

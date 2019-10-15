@@ -26,6 +26,7 @@ int Kernel_nn_memfree::preProc( const Instruction *inst ) {
 }
 
 int Kernel_nn_memfree::postProc(void) {
+    logfs << "\n";
     return 0;
 }
 
@@ -41,7 +42,6 @@ int Kernel_nn_memfree::decode_fb_data(const MemFree *opinfo) {
 #if LOG_LEVEL > 1
     logfs << "-------- Kernel_opinfo fb data decode result --------\n";
     logfs << "name           = " << _kernel_name << "\n";
-    logfs << "\n";
 #endif
     
     return 0;

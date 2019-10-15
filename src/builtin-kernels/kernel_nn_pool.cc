@@ -27,6 +27,7 @@ int Kernel_nn_pool::preProc( const Instruction *inst ) {
 }
 
 int Kernel_nn_pool::postProc(void) {
+    logfs << "\n";
     return 0;
 }
 
@@ -66,7 +67,6 @@ int Kernel_nn_pool::decode_fb_data(const Pooling *opinfo) {
         logfs << ti->tsize_h() << ",";
         logfs << ti->tsize_w() << "]\n";
     }
-    logfs << "\n";
     
     return 0;
 }

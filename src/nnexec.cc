@@ -38,6 +38,8 @@ NNExecutor::~NNExecutor(void) {
 }
 
 void NNExecutor::copy_input_data(char *in, int &size) {
+    _input = in;
+    _input_size = size;
 }
 
 void NNExecutor::copy_output_data(char *out, int &size) {
@@ -63,7 +65,12 @@ void NNExecutor::run(void) {
         }
             
         logfs << "NNExecutor::run() opcode is " << opcode << "\n";
+        cout  << "Executing... opcode(" << opcode << ")\n";
+        /* Get kernel handler
+         */
         Kernel* khandler = KernelList[ opcode ];
+        /* Executing kernel 
+         */
         khandler->preProc( inst );
         khandler->Run( rcontext );
         khandler->postProc();

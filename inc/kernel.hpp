@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <map>
 #include <stdexcept>
 
@@ -19,6 +20,13 @@ namespace NNFramework {
 typedef struct _tileinfo_t {
     unsigned long mem_addr;
     vector<int> dim;
+
+    int size( vector<int> d ) {
+        int tsize = 1;
+        for(auto a : d)
+            tsize *= a;
+        return tsize;
+    }
 } tileinfo_t;
 
 class Kernel {
@@ -31,7 +39,8 @@ public:
     virtual int postProc(void) = 0;
     virtual int Run( RunContext &rcontext ) = 0;
 
-private:
+protected:
+    void dump_data(string fileName, char *data, int data_size);
 };
 
 extern std::map<int, Kernel*> KernelList;

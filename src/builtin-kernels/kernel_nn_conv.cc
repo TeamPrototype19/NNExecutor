@@ -27,14 +27,21 @@ int Kernel_nn_conv::preProc( const Instruction *inst ) {
 }
 
 int Kernel_nn_conv::postProc(void) {
+    // DEBUG
+    dump_data( _kernel_name+"_o.dat", (char*)_output, _output_size);
+    logfs << "\n";
+
     return 0;
 }
 
 int Kernel_nn_conv::Run( RunContext &rcontext ) {
-    float *input  = (float*)(rcontext.main_buffer + _itinfo[0].mem_addr);
-    float *output = (float*)(rcontext.main_buffer + _otinfo[0].mem_addr);
+    _input  = (float*)(rcontext.main_buffer + _itinfo[0].mem_addr);
+    _output = (float*)(rcontext.main_buffer + _otinfo[0].mem_addr);
 
-    test_kernel_conv3d( output, input, (float*)_weight, (float*)_bias );
+    // DEBUG
+    dump_data( _kernel_name+"_i.dat", (char*)_input, _input_size);
+
+    test_kernel_conv3d( _output, _input, _weight, _bias );
 
     return 0;
 }
@@ -47,8 +54,8 @@ int Kernel_nn_conv::decode_fb_data(const Conv *conv) {
     _stride_size_h = conv->stride_size_h();
     _pad_size_w = conv->pad_size_w();
     _pad_size_h = conv->pad_size_h();
-    _weight = conv->weight()->data();
-    _bias = conv->bias()->data();
+    _weight = (float*)conv->weight()->data();
+    _bias = (float*)conv->bias()->data();
     _weight_size = conv->weight()->size();
     _bias_size = conv->bias()->size();
 
@@ -63,6 +70,7 @@ int Kernel_nn_conv::decode_fb_data(const Conv *conv) {
         t.dim.push_back( ti->tsize_w() );
         _itinfo.push_back( t );
     }
+    _input_size = _itinfo[0].size( _itinfo[0].dim ) * sizeof(float);
     
     auto oti = conv->otile();
     for(unsigned int i = 0 ; i < oti->Length() ; i++) {
@@ -75,6 +83,7 @@ int Kernel_nn_conv::decode_fb_data(const Conv *conv) {
         t.dim.push_back( ti->tsize_w() );
         _otinfo.push_back( t );
     }
+    _output_size = _otinfo[0].size( _otinfo[0].dim ) * sizeof(float);
 
 
     logfs << "-------- Kernel_opinfo fb data decode result --------\n";
@@ -108,7 +117,6 @@ int Kernel_nn_conv::decode_fb_data(const Conv *conv) {
         logfs << ti.dim[2] << ",";
         logfs << ti.dim[3] << "]\n";
     }
-    logfs << "\n";
     
     return 0;
 }

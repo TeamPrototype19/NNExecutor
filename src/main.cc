@@ -80,8 +80,11 @@ void readBinaryData(char* buf, int &size, std::string filename) {
     std::ifstream ifs;
     ifs.open(filename.c_str(), std::ios::in | std::ios::binary);
 
-    if( ! ifs.is_open() )
+    if( ! ifs.is_open() ) {
+        std::cerr << "[ERROR] can't open file " << filename << "\n";
+        throw runtime_error("Program will be terminated.\n");
         return;
+    }
 
     /* Get buffer size
      */
@@ -109,8 +112,11 @@ void writeBinaryData(char* buf, int &size, std::string filename) {
     std::ofstream ofs;
     ofs.open(filename.c_str(), std::ios::out | std::ios::binary);
 
-    if( ! ofs.is_open() )
+    if( ! ofs.is_open() ) {
+        std::cerr << "[ERROR] can't open file " << filename << "\n";
+        throw runtime_error("Program will be terminated.\n");
         return;
+    }
 
     ofs.write( buf, size );
     ofs.close();

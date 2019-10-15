@@ -26,6 +26,7 @@ int Kernel_nn_memalloc::preProc( const Instruction *inst ) {
 }
 
 int Kernel_nn_memalloc::postProc(void) {
+    logfs << "\n";
     return 0;
 }
 
@@ -43,7 +44,6 @@ int Kernel_nn_memalloc::decode_fb_data(const MemAlloc *opinfo) {
     logfs << "-------- Kernel_opinfo fb data decode result --------\n";
     logfs << "name           = " << _kernel_name << "\n";
     logfs << "total_buf_size = " << _total_buff_size << "\n";
-    logfs << "\n";
 #endif
     
     return 0;

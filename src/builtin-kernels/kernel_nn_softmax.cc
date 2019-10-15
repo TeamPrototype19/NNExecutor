@@ -27,6 +27,7 @@ int Kernel_nn_softmax::preProc( const Instruction *inst ) {
 }
 
 int Kernel_nn_softmax::postProc(void) {
+    logfs << "\n";
     return 0;
 }
 
@@ -60,7 +61,6 @@ int Kernel_nn_softmax::decode_fb_data(const Softmax *opinfo) {
         logfs << ti->tsize_h() << ",";
         logfs << ti->tsize_w() << "]\n";
     }
-    logfs << "\n";
     
     return 0;
 }

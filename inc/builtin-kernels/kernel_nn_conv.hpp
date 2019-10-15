@@ -31,10 +31,14 @@ private:
     int _stride_size_h;
     int _pad_size_w;
     int _pad_size_h;
+    int _input_size;
+    int _output_size;
     int _weight_size;
     int _bias_size;
-    const float *_weight;
-    const float *_bias;
+    float *_input;
+    float *_output;
+    float *_weight;
+    float *_bias;
     vector<tileinfo_t> _itinfo, _otinfo;
     int decode_fb_data(const Conv *);
 };

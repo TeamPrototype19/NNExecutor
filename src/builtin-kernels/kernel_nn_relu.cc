@@ -27,6 +27,7 @@ int Kernel_nn_relu::preProc( const Instruction *inst ) {
 }
 
 int Kernel_nn_relu::postProc(void) {
+    logfs << "\n";
     return 0;
 }
 
@@ -60,7 +61,6 @@ int Kernel_nn_relu::decode_fb_data(const Relu *opinfo) {
         logfs << ti->tsize_h() << ",";
         logfs << ti->tsize_w() << "]\n";
     }
-    logfs << "\n";
     
     return 0;
 }

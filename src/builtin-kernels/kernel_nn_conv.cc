@@ -40,6 +40,8 @@ int Kernel_nn_conv::Run( RunContext &rcontext ) {
 
     // DEBUG
     dump_data( _kernel_name+"_i.dat", (char*)_input, _input_size);
+    dump_data( _kernel_name+"_w.dat", (char*)_weight, _weight_size);
+    dump_data( _kernel_name+"_b.dat", (char*)_bias, _bias_size);
 
     test_kernel_conv3d( _output, _input, _weight, _bias );
 
@@ -56,8 +58,8 @@ int Kernel_nn_conv::decode_fb_data(const Conv *conv) {
     _pad_size_h = conv->pad_size_h();
     _weight = (float*)conv->weight()->data();
     _bias = (float*)conv->bias()->data();
-    _weight_size = conv->weight()->size();
-    _bias_size = conv->bias()->size();
+    _weight_size = conv->weight()->size() * sizeof(float);
+    _bias_size = conv->bias()->size() * sizeof(float);
 
     auto iti = conv->itile();
     for(unsigned int i = 0 ; i < iti->Length() ; i++) {

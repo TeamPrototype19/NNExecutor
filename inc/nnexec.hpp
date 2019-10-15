@@ -14,14 +14,14 @@ public:
     NNExecutor(string cgo_file_name);
     ~NNExecutor();
 
-    void copy_input_data(char *in, int &size);
-    void copy_output_data(char *out, int &size);
+    void set_input_data(char *in, int &size);
+    void set_output_data(char *out, int &size);
     void run(void);
 private:
     int    _input_size;
-    float *_input;
+    char  *_input;
     int    _output_size;
-    float *_output;
+    char  *_output;
     char  *_cgo_buf;
     int    _cgo_buf_size;
     const NNFramework::InstPacket* cgo;

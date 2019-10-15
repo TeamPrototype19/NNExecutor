@@ -37,12 +37,18 @@ NNExecutor::NNExecutor(string cgo_file_name) {
 NNExecutor::~NNExecutor(void) {
 }
 
-void NNExecutor::copy_input_data(char *in, int &size) {
+void NNExecutor::set_input_data(char *in, int &size) {
     _input = in;
     _input_size = size;
+    rcontext.in_data = in;
+    rcontext.in_data_size = size;
 }
 
-void NNExecutor::copy_output_data(char *out, int &size) {
+void NNExecutor::set_output_data(char *out, int &size) {
+    _output = out;
+    _output_size = size;
+    rcontext.out_data = out;
+    rcontext.out_data_size = size;
 }
 
 void NNExecutor::run(void) {

@@ -9,8 +9,8 @@
 #include "log.h"
 #include "nnexec.hpp"
 
-void readBinaryData(char* buf, int &size, std::string filename);
-void writeBinaryData(char* buf, int &size, std::string filename);
+void readBinaryData(char* &buf, int &size, std::string filename);
+void writeBinaryData(char* &buf, int &size, std::string filename);
 
 int main(int argc, char **argv) {
 	char option;
@@ -55,12 +55,12 @@ int main(int argc, char **argv) {
         NNFramework::NNExecutor nne( packetFileName );
 
         readBinaryData( ibuf, ibsize, inputFileName );
-        nne.copy_input_data( ibuf, ibsize );
+        nne.set_input_data( ibuf, ibsize );
 
         cout << "Executing...\n";
         nne.run();
 
-        nne.copy_output_data( obuf, obsize );
+        nne.set_output_data( obuf, obsize );
         writeBinaryData( obuf, obsize, outputFileName );
     }
     catch (const exception& e) {
@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
 	return 0;
 }
 
-void readBinaryData(char* buf, int &size, std::string filename) {
+void readBinaryData(char* &buf, int &size, std::string filename) {
     /* File open
      */
     size = 0;
@@ -106,7 +106,7 @@ void readBinaryData(char* buf, int &size, std::string filename) {
 }
 
 
-void writeBinaryData(char* buf, int &size, std::string filename) {
+void writeBinaryData(char* &buf, int &size, std::string filename) {
     /* File open
      */
     std::ofstream ofs;

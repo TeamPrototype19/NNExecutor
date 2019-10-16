@@ -64,6 +64,7 @@ int main(int argc, char **argv) {
         writeBinaryData( obuf, obsize, outputFileName );
     }
     catch (const exception& e) {
+        cout << e.what() << "\n";
         cout << "Program receives exception. Program will be terminated.\n";
     }
 

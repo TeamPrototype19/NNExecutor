@@ -19,16 +19,16 @@ int Kernel_nn_input::GetOpCode(void) {
 }
 
 int Kernel_nn_input::preProc( const Instruction *inst ) {
-    auto inputinfo = inst->operand_as_Input();
+    auto opinfo = inst->operand_as_Input();
 
-    decode_fb_data( inputinfo );
+    decode_fb_data( opinfo );
 
     return 0;
 }
 
 int Kernel_nn_input::postProc(void) {
     // DEBUG
-    dump_data( _kernel_name+"_o.dat", (char*)_output, _output_size, sizeof(float));
+    dump_data( _kernel_name+"_o.dat", _output, _output_size, sizeof(float));
 
     logfs << "\n";
     return 0;
@@ -43,33 +43,18 @@ int Kernel_nn_input::Run( RunContext &rcontext ) {
 }
 
 int Kernel_nn_input::decode_fb_data(const Input *opinfo) {
+    /* Decoder flatbuffer contents
+     */
     _kernel_name = opinfo->kernel_name()->c_str();
-    auto oti = opinfo->otile();
-    for(unsigned int i = 0 ; i < oti->Length() ; i++) {
-        auto ti = oti->Get(i);
-        tileinfo_t t;
-        t.mem_addr = ti->addr();
-        t.dim.push_back( ti->tsize_n() );
-        t.dim.push_back( ti->tsize_c() );
-        t.dim.push_back( ti->tsize_h() );
-        t.dim.push_back( ti->tsize_w() );
-        _otinfo.push_back( t );
-    }
-    _output_size = _otinfo[0].size( _otinfo[0].dim ) * sizeof(float);
 
+    get_otile_info( opinfo->otile() );
+
+
+    /* Print decoded content on log file
+     */
     logfs << "-------- Kernel_opinfo fb data decode result --------\n";
     logfs << "name           = " << _kernel_name << "\n";
-    logfs << "*** tile info ***\n";
-    for(unsigned int i = 0 ; i < _otinfo.size() ; i++) {
-        auto ti = _otinfo[i];
-        logfs << "Output tile info => " << i << "'th\n";
-        logfs << "memory address = 0x" << setfill('0') << right << setw(8) << hex << ti.mem_addr << dec << "\n";
-        logfs << "tsize[n,c,h,w] = [";
-        logfs << ti.dim[0] << ",";
-        logfs << ti.dim[1] << ",";
-        logfs << ti.dim[2] << ",";
-        logfs << ti.dim[3] << "]\n";
-    }
+    display_tile_info( logfs );
    
     return 0;
 }

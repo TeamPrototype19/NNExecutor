@@ -36,20 +36,18 @@ int Kernel_nn_output::Run( RunContext &rcontext ) {
 }
 
 int Kernel_nn_output::decode_fb_data(const Output *opinfo) {
+    /* Decoder flatbuffer contents
+     */
+    _kernel_name = opinfo->kernel_name()->c_str();
+
+    get_itile_info( opinfo->itile() );
+
+
+    /* Print decoded content on log file
+     */
     logfs << "-------- Kernel_opinfo fb data decode result --------\n";
-    logfs << "name           = " << opinfo->kernel_name()->c_str() << "\n";
-    logfs << "*** tile info ***\n";
-    auto iti = opinfo->itile();
-    for(unsigned int i = 0 ; i < iti->Length() ; i++) {
-        auto ti = iti->Get(i);
-        logfs << "Input tile info  => " << i << "'th\n";
-        logfs << "memory address = 0x" << setfill('0') << right << setw(8) << hex << ti->addr() << dec << "\n";
-        logfs << "tsize[n,c,h,w] = [";
-        logfs << ti->tsize_n() << ",";
-        logfs << ti->tsize_c() << ",";
-        logfs << ti->tsize_h() << ",";
-        logfs << ti->tsize_w() << "]\n";
-    }
+    logfs << "name           = " << _kernel_name << "\n";
+    display_tile_info( logfs );
     
     return 0;
 }

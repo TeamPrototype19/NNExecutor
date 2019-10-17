@@ -16,11 +16,6 @@ public:
 
 private:
     int decode_fb_data(const Input *);
-
-    string _kernel_name;
-    char *_output;
-    int _output_size;
-    vector<tileinfo_t> _otinfo;
 };
 
 }

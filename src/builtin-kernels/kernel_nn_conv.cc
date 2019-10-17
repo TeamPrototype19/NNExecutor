@@ -35,15 +35,15 @@ int Kernel_nn_conv::postProc(void) {
 }
 
 int Kernel_nn_conv::Run( RunContext &rcontext ) {
-    _input  = (float*)(rcontext.main_buffer + _itinfo[0].mem_addr);
-    _output = (float*)(rcontext.main_buffer + _otinfo[0].mem_addr);
+    _input  = (rcontext.main_buffer + _itinfo[0].mem_addr);
+    _output = (rcontext.main_buffer + _otinfo[0].mem_addr);
 
     // DEBUG
-    dump_data( _kernel_name+"_i.dat", (char*)_input, _input_size, sizeof(float));
+    dump_data( _kernel_name+"_i.dat", _input, _input_size, sizeof(float));
     dump_data( _kernel_name+"_w.dat", (char*)_weight, _weight_size, sizeof(float));
     dump_data( _kernel_name+"_b.dat", (char*)_bias, _bias_size, sizeof(float));
 
-    test_kernel_conv3d( _output, _input, _weight, _bias );
+    test_kernel_conv3d( (float*)_output, (float*)_input, _weight, _bias );
 
     return 0;
 }

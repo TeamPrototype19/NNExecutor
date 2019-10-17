@@ -27,42 +27,72 @@ int Kernel_nn_softmax::preProc( const Instruction *inst ) {
 }
 
 int Kernel_nn_softmax::postProc(void) {
+    // DEBUG
+    dump_data( _kernel_name+"_o.dat", (char*)_output, _output_size, sizeof(float));
     logfs << "\n";
+
     return 0;
 }
 
 int Kernel_nn_softmax::Run( RunContext &rcontext ) {
+    _input  = (rcontext.main_buffer + _itinfo[0].mem_addr);
+    _output = (rcontext.main_buffer + _otinfo[0].mem_addr);
+
+    // DEBUG
+    dump_data( _kernel_name+"_i.dat", _input, _input_size, sizeof(float));
+
+    test_kernel_softmax( (float*)_output, (float*)_input );
+
     return 0;
 }
 
 int Kernel_nn_softmax::decode_fb_data(const Softmax *opinfo) {
+    /* Decoder flatbuffer contents
+     */
+    _kernel_name = opinfo->kernel_name()->c_str();
+
+    get_itile_info( opinfo->itile() );
+    get_otile_info( opinfo->otile() );
+
+
+    /* Print decoded content on log file
+     */
     logfs << "-------- Kernel_opinfo fb data decode result --------\n";
-    logfs << "name           = " << opinfo->kernel_name()->c_str() << "\n";
-    logfs << "*** tile info ***\n";
-    auto iti = opinfo->itile();
-    for(unsigned int i = 0 ; i < iti->Length() ; i++) {
-        auto ti = iti->Get(i);
-        logfs << "Input tile info => " << i << "'th\n";
-        logfs << "memory address = 0x" << setfill('0') << right << setw(8) << hex << ti->addr() << dec << "\n";
-        logfs << "tsize[n,c,h,w] = [";
-        logfs << ti->tsize_n() << ",";
-        logfs << ti->tsize_c() << ",";
-        logfs << ti->tsize_h() << ",";
-        logfs << ti->tsize_w() << "]\n";
-    }
-    auto oti = opinfo->otile();
-    for(unsigned int i = 0 ; i < oti->Length() ; i++) {
-        auto ti = oti->Get(i);
-        logfs << "Output tile info => " << i << "'th\n";
-        logfs << "memory address = 0x" << setfill('0') << right << setw(8) << hex << ti->addr() << dec << "\n";
-        logfs << "tsize[n,c,h,w] = [";
-        logfs << ti->tsize_n() << ",";
-        logfs << ti->tsize_c() << ",";
-        logfs << ti->tsize_h() << ",";
-        logfs << ti->tsize_w() << "]\n";
-    }
-    
+    logfs << "name           = " << _kernel_name << "\n";
+    display_tile_info( logfs );
+ 
     return 0;
+}
+
+void Kernel_nn_softmax::test_kernel_softmax(
+    float *output,
+    float *input
+) {
+
+    //int dbg_out_cnt = 0;
+
+    int N = _itinfo[0].dim[0];
+
+    int size = 1;
+    for(auto a : _itinfo[0].dim)
+        size *= a;
+    size /= N;
+
+    for(int n = 0 ; n < N; n++) {
+        float sum = 0;
+        float *op = output;
+        /* Calculate sum
+         */
+        for(int i = 0 ; i < size ; i++) {
+            *op = exp(*input++);
+            sum += *op++;
+        }
+        for(int i = 0 ; i < size ; i++) {
+            *output++ /= sum;
+        }
+    }
+
+    return;
 }
 
 }

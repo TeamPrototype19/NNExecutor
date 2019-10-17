@@ -35,13 +35,13 @@ int Kernel_nn_relu::postProc(void) {
 }
 
 int Kernel_nn_relu::Run( RunContext &rcontext) {
-    _input  = (float*)(rcontext.main_buffer + _itinfo[0].mem_addr);
-    _output = (float*)(rcontext.main_buffer + _otinfo[0].mem_addr);
+    _input  = (rcontext.main_buffer + _itinfo[0].mem_addr);
+    _output = (rcontext.main_buffer + _otinfo[0].mem_addr);
 
     // DEBUG
-    dump_data( _kernel_name+"_i.dat", (char*)_input, _input_size, sizeof(float));
+    dump_data( _kernel_name+"_i.dat", _input, _input_size, sizeof(float));
 
-    //test_kernel_relu( _output, _input );
+    test_kernel_relu( (float*)_output, (float*)_input );
 
     return 0;
 }
@@ -69,14 +69,9 @@ void Kernel_nn_relu::test_kernel_relu(
     float *input
 ) {
 
-    //int dbg_out_cnt = 0;
-
-    int N = _itinfo[0].dim[0];
-    int C = _itinfo[0].dim[1];
-    int H = _itinfo[0].dim[2];
-    int W = _itinfo[0].dim[3];
-
-    int size = N*C*H*W;
+    int size = 1;
+    for(auto a : _itinfo[0].dim)
+        size *= a;
 
     for(int n = 0 ; n < size ; n++) {
         /* Kernel loop

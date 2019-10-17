@@ -15,7 +15,6 @@ public:
     int Run( RunContext &rcontext ) override;
 
 private:
-    string _kernel_name;
     unsigned long _total_buff_size;
     int decode_fb_data(const MemAlloc *);
 };

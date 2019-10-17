@@ -34,15 +34,15 @@ int Kernel_nn_fc::postProc(void) {
 }
 
 int Kernel_nn_fc::Run( RunContext &rcontext ) {
-    _input  = (float*)(rcontext.main_buffer + _itinfo[0].mem_addr);
-    _output = (float*)(rcontext.main_buffer + _otinfo[0].mem_addr);
+    _input  = (rcontext.main_buffer + _itinfo[0].mem_addr);
+    _output = (rcontext.main_buffer + _otinfo[0].mem_addr);
 
     // DEBUG
-    dump_data( _kernel_name+"_i.dat", (char*)_input, _input_size, sizeof(float));
+    dump_data( _kernel_name+"_i.dat", _input, _input_size, sizeof(float));
     dump_data( _kernel_name+"_w.dat", (char*)_weight, _weight_size, sizeof(float));
     dump_data( _kernel_name+"_b.dat", (char*)_bias, _bias_size, sizeof(float));
 
-    //test_kernel_fc( _output, _input );
+    test_kernel_fc( (float*)_output, (float*)_input, _weight, _bias );
 
     return 0;
 }
@@ -79,19 +79,23 @@ void Kernel_nn_fc::test_kernel_fc(
     float *weight,
     float *bias
 ) {
-
     int N = _itinfo[0].dim[0];
-    int C = _itinfo[0].dim[1];
-    int H = _itinfo[0].dim[2];
-    int W = _itinfo[0].dim[3];
-    int O = _otinfo[0].dim[1];
 
-    int ifm_size = C*H*W;
+    int ifm_size = 1;
+    for(auto a : _itinfo[0].dim)
+        ifm_size *= a;
+    ifm_size /= N;
+
+    int ofm_size = 1;
+    for(auto a : _otinfo[0].dim)
+        ofm_size *= a;
+    ofm_size /= N;
+
 
     float *wg = weight;
 
     for(int n = 0 ; n < N ; n++) {
-        for(int o = 0 ; o < O ; o++) {
+        for(int o = 0 ; o < ofm_size ; o++) {
             float *in = input + ifm_size * n;
             float sum = 0;
             for(int i = 0 ; i < ifm_size ; i++) {

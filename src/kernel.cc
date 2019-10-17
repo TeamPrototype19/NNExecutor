@@ -33,13 +33,12 @@ void Kernel::get_itile_info(const flatbuffers::Vector<flatbuffers::Offset<TileIn
         auto ti = iti->Get(i);
         tileinfo_t t;
         t.mem_addr = ti->addr();
-        t.dim.push_back( ti->tsize_n() );
-        t.dim.push_back( ti->tsize_c() );
-        t.dim.push_back( ti->tsize_h() );
-        t.dim.push_back( ti->tsize_w() );
+        for(unsigned int j = 0 ; j < ti->tsize()->Length() ; j++)
+            t.dim.push_back( ti->tsize()->Get(j) );
         _itinfo[i] = t;
     }
-    _input_size = _itinfo[0].size( _itinfo[0].dim );
+    tileinfo_t b;
+    _input_size = b.total_size( _itinfo[0].dim );
 
     return;
 }
@@ -50,13 +49,12 @@ void Kernel::get_otile_info(const flatbuffers::Vector<flatbuffers::Offset<TileIn
         auto ti = oti->Get(i);
         tileinfo_t t;
         t.mem_addr = ti->addr();
-        t.dim.push_back( ti->tsize_n() );
-        t.dim.push_back( ti->tsize_c() );
-        t.dim.push_back( ti->tsize_h() );
-        t.dim.push_back( ti->tsize_w() );
+        for(unsigned int j = 0 ; j < ti->tsize()->Length() ; j++)
+            t.dim.push_back( ti->tsize()->Get(j) );
         _otinfo[i] = t;
     }
-    _output_size = _otinfo[0].size( _otinfo[0].dim );
+    tileinfo_t b;
+    _output_size = b.total_size( _otinfo[0].dim );
 
     return;
 }
@@ -68,22 +66,20 @@ void Kernel::display_tile_info(std::ofstream &ofs) {
         ofs << "Input tile info => " << i << "'th\n";
         ofs << "memory address = 0x" << std::setfill('0') << std::right \
             << std::setw(8) << std::hex << ti.mem_addr << std::dec << "\n";
-        ofs << "tsize[n,c,h,w] = [";
-        ofs << ti.dim[0] << ",";
-        ofs << ti.dim[1] << ",";
-        ofs << ti.dim[2] << ",";
-        ofs << ti.dim[3] << "]\n";
+        ofs << "tsize = [";
+        for(auto a : ti.dim)
+            ofs << a << ",";
+        ofs << "\b]\n";
     }
     for(unsigned int i = 0 ; i < _otinfo.size() ; i++) {
         auto ti = _otinfo[i];
         ofs << "Output tile info => " << i << "'th\n";
         ofs << "memory address = 0x" << std::setfill('0') << std::right \
             << std::setw(8) << std::hex << ti.mem_addr << std::dec << "\n";
-        ofs << "tsize[n,c,h,w] = [";
-        ofs << ti.dim[0] << ",";
-        ofs << ti.dim[1] << ",";
-        ofs << ti.dim[2] << ",";
-        ofs << ti.dim[3] << "]\n";
+        ofs << "tsize = [";
+        for(auto a : ti.dim)
+            ofs << a << ",";
+        ofs << "\b]\n";
     }
     return;
 }

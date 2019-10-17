@@ -22,7 +22,6 @@ private:
         float *input
     );
 
-    string _kernel_name;
     int decode_fb_data(const Relu *);
 };
 

@@ -21,7 +21,7 @@ typedef struct _tileinfo_t {
     unsigned long mem_addr;
     vector<int> dim;
 
-    int size( vector<int> d ) {
+    int total_size( vector<int> d ) {
         int tsize = 1;
         for(auto a : d)
             tsize *= a;
@@ -47,8 +47,8 @@ protected:
     void dump_data(string fileName, char *data, int data_num, int data_size);
 
     string _kernel_name;
-    float *_input;
-    float *_output;
+    char *_input;
+    char *_output;
     int _input_size;
     int _output_size;
     vector<tileinfo_t> _itinfo, _otinfo;

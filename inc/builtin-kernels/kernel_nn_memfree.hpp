@@ -15,7 +15,6 @@ public:
     int Run( RunContext &rcontext ) override;
 
 private:
-    string _kernel_name;
     int decode_fb_data(const MemFree *);
 };
 

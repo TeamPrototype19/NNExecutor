@@ -34,13 +34,13 @@ int Kernel_nn_pool::postProc(void) {
 }
 
 int Kernel_nn_pool::Run( RunContext &rcontext ) {
-    _input  = (float*)(rcontext.main_buffer + _itinfo[0].mem_addr);
-    _output = (float*)(rcontext.main_buffer + _otinfo[0].mem_addr);
+    _input  = (rcontext.main_buffer + _itinfo[0].mem_addr);
+    _output = (rcontext.main_buffer + _otinfo[0].mem_addr);
 
     // DEBUG
-    dump_data( _kernel_name+"_i.dat", (char*)_input, _input_size, sizeof(float));
+    dump_data( _kernel_name+"_i.dat", _input, _input_size, sizeof(float));
 
-    test_kernel_pool( _output, _input );
+    test_kernel_pool( (float*)_output, (float*)_input );
 
     return 0;
 }

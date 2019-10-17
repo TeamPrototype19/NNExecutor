@@ -15,6 +15,13 @@ public:
     int Run( RunContext &rcontext ) override;
 
 private:
+    /* CPU not-optimized code
+     */
+    void test_kernel_softmax(
+        float *output,
+        float *input
+    );
+
     int decode_fb_data(const Softmax *);
 };
 

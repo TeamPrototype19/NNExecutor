@@ -24,22 +24,16 @@ private:
         float *bias
     );
 
-    string _kernel_name;
     int _kernel_size_w;
     int _kernel_size_h;
     int _stride_size_w;
     int _stride_size_h;
     int _pad_size_w;
     int _pad_size_h;
-    int _input_size;
-    int _output_size;
     int _weight_size;
     int _bias_size;
-    float *_input;
-    float *_output;
     float *_weight;
     float *_bias;
-    vector<tileinfo_t> _itinfo, _otinfo;
     int decode_fb_data(const Conv *);
 };
 

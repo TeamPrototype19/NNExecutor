@@ -15,6 +15,18 @@ public:
     int Run( RunContext &rcontext ) override;
 
 private:
+    void test_kernel_pool(
+        float *output,
+        float *input
+    );
+
+    int _kernel_size_w;
+    int _kernel_size_h;
+    int _stride_size_w;
+    int _stride_size_h;
+    int _pad_size_w;
+    int _pad_size_h;
+
     int decode_fb_data(const Pooling *);
 };
 

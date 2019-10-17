@@ -43,7 +43,7 @@ int Kernel_nn_output::decode_fb_data(const Output *opinfo) {
     for(unsigned int i = 0 ; i < iti->Length() ; i++) {
         auto ti = iti->Get(i);
         logfs << "Input tile info  => " << i << "'th\n";
-        logfs << "memory address = 0x" << setfill('0') << right << setw(8) << hex << ti->addr() << "\n";
+        logfs << "memory address = 0x" << setfill('0') << right << setw(8) << hex << ti->addr() << dec << "\n";
         logfs << "tsize[n,c,h,w] = [";
         logfs << ti->tsize_n() << ",";
         logfs << ti->tsize_c() << ",";

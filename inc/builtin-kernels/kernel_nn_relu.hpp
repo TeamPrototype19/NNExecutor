@@ -15,6 +15,14 @@ public:
     int Run( RunContext &rcontext ) override;
 
 private:
+    /* TEST CPU kernel (not-optimized)
+     */
+    void test_kernel_relu(
+        float *output,
+        float *input
+    );
+
+    string _kernel_name;
     int decode_fb_data(const Relu *);
 };
 

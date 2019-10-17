@@ -28,7 +28,7 @@ int Kernel_nn_input::preProc( const Instruction *inst ) {
 
 int Kernel_nn_input::postProc(void) {
     // DEBUG
-    dump_data( _kernel_name+"_o.dat", (char*)_output, _output_size);
+    dump_data( _kernel_name+"_o.dat", (char*)_output, _output_size, sizeof(float));
 
     logfs << "\n";
     return 0;

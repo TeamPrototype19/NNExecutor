@@ -39,8 +39,19 @@ public:
     virtual int postProc(void) = 0;
     virtual int Run( RunContext &rcontext ) = 0;
 
+    void get_itile_info(const flatbuffers::Vector<flatbuffers::Offset<TileInfo>> *ti);
+    void get_otile_info(const flatbuffers::Vector<flatbuffers::Offset<TileInfo>> *ti);
+    void display_tile_info(std::ofstream &ofs);
+
 protected:
-    void dump_data(string fileName, char *data, int data_size);
+    void dump_data(string fileName, char *data, int data_num, int data_size);
+
+    string _kernel_name;
+    float *_input;
+    float *_output;
+    int _input_size;
+    int _output_size;
+    vector<tileinfo_t> _itinfo, _otinfo;
 };
 
 extern std::map<int, Kernel*> KernelList;

@@ -17,11 +17,13 @@ void Kernel::dump_data(string filename, char *data, int data_num, int data_size)
         return;
     }
 
+#if 0
     // DEBUG
     std::cout << "Kernel::dump_data() ";
     std::cout << "filename = " << filename \
         << "\tdata_size = " << data_size << "\t" \
         << "\tdata_num  = " << data_num  << "\n";
+#endif
 
     ofs.write( data, data_size * data_num );
     ofs.close();
@@ -67,9 +69,9 @@ void Kernel::display_tile_info(std::ofstream &ofs) {
         ofs << "memory address = 0x" << std::setfill('0') << std::right \
             << std::setw(8) << std::hex << ti.mem_addr << std::dec << "\n";
         ofs << "tsize = [";
-        for(auto a : ti.dim)
-            ofs << a << ",";
-        ofs << "\b]\n";
+        for(unsigned int i = 0; i < ti.dim.size()-1; i++)
+            ofs << ti.dim[i] << ",";
+        ofs << ti.dim.back() << "]\n";
     }
     for(unsigned int i = 0 ; i < _otinfo.size() ; i++) {
         auto ti = _otinfo[i];
@@ -77,9 +79,9 @@ void Kernel::display_tile_info(std::ofstream &ofs) {
         ofs << "memory address = 0x" << std::setfill('0') << std::right \
             << std::setw(8) << std::hex << ti.mem_addr << std::dec << "\n";
         ofs << "tsize = [";
-        for(auto a : ti.dim)
-            ofs << a << ",";
-        ofs << "\b]\n";
+        for(unsigned int i = 0; i < ti.dim.size()-1; i++)
+            ofs << ti.dim[i] << ",";
+        ofs << ti.dim.back() << "]\n";
     }
     return;
 }

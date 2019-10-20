@@ -42,6 +42,7 @@ public:
     void get_itile_info(const flatbuffers::Vector<flatbuffers::Offset<TileInfo>> *ti);
     void get_otile_info(const flatbuffers::Vector<flatbuffers::Offset<TileInfo>> *ti);
     void display_tile_info(std::ofstream &ofs);
+    string get_kernel_name(void) {return _kernel_name;}
 
 protected:
     void dump_data(string fileName, char *data, int data_num, int data_size);

@@ -25,4 +25,4 @@ add_executable(nne
 	"${SRCS}"
 	"${CMAKE_CURRENT_SOURCE_DIR}/inc/instPacket_generated.h"
 )
-#target_link_libraries(nnc ${PROTOBUF_LIBRARIES})
+target_link_libraries(nne "-lpthread")

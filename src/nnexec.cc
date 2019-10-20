@@ -71,7 +71,7 @@ void NNExecutor::run(void) {
         }
             
         logfs << "NNExecutor::run() opcode is " << opcode << "\n";
-        cout  << "Executing... opcode(" << opcode << ")\n";
+        cout  << "Executing... opcode(" << opcode << ")\t";
         /* Get kernel handler
          */
         Kernel* khandler = KernelList[ opcode ];
@@ -80,6 +80,8 @@ void NNExecutor::run(void) {
         khandler->preProc( inst );
         khandler->Run( rcontext );
         khandler->postProc();
+
+        cout << "opname = " << khandler->get_kernel_name() << "\n";
     }
 }
 

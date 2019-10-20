@@ -43,7 +43,10 @@ int Kernel_nn_conv::Run( RunContext &rcontext ) {
     dump_data( _kernel_name+"_w.dat", (char*)_weight, _weight_size, sizeof(float));
     dump_data( _kernel_name+"_b.dat", (char*)_bias, _bias_size, sizeof(float));
 
-    test_kernel_conv3d( (float*)_output, (float*)_input, _weight, _bias );
+    /* Generates kernel threads 
+     */
+    creates_threads();
+    wait_threads();
 
     return 0;
 }
@@ -84,25 +87,102 @@ int Kernel_nn_conv::decode_fb_data(const Conv *opinfo) {
     return 0;
 }
 
+void Kernel_nn_conv::wait_threads(void)
+{
+    for(auto& thread : thread_list)
+        thread.join();
 
-void Kernel_nn_conv::test_kernel_conv3d(
-    float *output,
-    float *input,
-    float *weight,
-    float *bias
+    thread_args_list.clear();
+    thread_list.clear();
+
+}
+
+void Kernel_nn_conv::creates_threads(void)
+{
+
+    assert( _itinfo.size() == 1 );
+    assert( _otinfo.size() == 1 );
+    assert( _itinfo[0].dim.size() == 4 );
+    assert( _otinfo[0].dim.size() == 4 );
+    assert( _itinfo[0].dim[0] == 1 );
+    assert( _otinfo[0].dim[0] == 1 );
+
+    /* Check tile sizes
+     */
+    int iC = _itinfo[0].dim[1];
+    int oN = _otinfo[0].dim[0];
+    int oC = _otinfo[0].dim[1];
+    int oH = _otinfo[0].dim[2];
+    int oW = _otinfo[0].dim[3];
+    int oC_t = (oC + 3) / 4;
+
+    int t_ot_mem_addr = oN * oC_t * oH * oW;
+    int t_weight_addr = _kernel_size_h * _kernel_size_w * iC * oC_t;
+    int t_bias_addr   = oC_t;
+    t_ot_mem_addr *= sizeof(float);
+    //t_weight_addr *= sizeof(float);
+    //t_bias_addr   *= sizeof(float);
+
+    /* Creates CPU kernel threads
+     */
+    for(int i = 0; i < 4 ; i++) {
+        KernelArgs_t arg;
+        tileinfo_t iti, oti;
+        // input/output tile info
+
+        iti = _itinfo[0];
+        oti = _otinfo[0];
+        oC -= oC_t;
+        oti.dim[1] = (oC >= 0) ? oC_t : (oC_t + oC);
+        oti.mem_addr = oti.mem_addr + t_ot_mem_addr * i;
+        arg.iti    = iti;
+        arg.oti    = oti;
+
+        arg.output = (float*) (_output + t_ot_mem_addr * i);
+        arg.input  = (float*) _input;
+        arg.weight = _weight + t_weight_addr * i;
+        arg.bias   = _bias   + t_bias_addr * i;
+
+        thread_args_list.push_back( arg );
+    }
+
+    for(int i = 0; i < 4 ; i++)
+        thread_list.push_back( thread(cpu_kernel_wrapper, this, i) );
+
+    /* Creates GPU kernel threads
+     */
+    //TODO: implements it
+
+    return;
+}
+
+void Kernel_nn_conv::gpu_kernel_conv3d(
+    int args_list_index
+)
+{
+}
+
+void Kernel_nn_conv::cpu_kernel_conv3d(
+    int args_list_index
 ) {
 
-    int N = _itinfo[0].dim[0];
-    int C = _itinfo[0].dim[1];
-    int H = _itinfo[0].dim[2];
-    int W = _itinfo[0].dim[3];
-    int O = _otinfo[0].dim[1];
+    auto& args = thread_args_list[ args_list_index ];
+    int N = args.iti.dim[0];
+    int C = args.iti.dim[1];
+    int H = args.iti.dim[2];
+    int W = args.iti.dim[3];
+    int O = args.oti.dim[1];
     int KW = _kernel_size_w;
     int KH = _kernel_size_h;
     int SW = _stride_size_w;
     int SH = _stride_size_h;
     int PW = _pad_size_w;
     int PH = _pad_size_h;
+
+    float *output = args.output;
+    float *input  = args.input;
+    float *weight = args.weight;
+    float *bias   = args.bias;
 
     for(int n = 0 ; n < N ; n++) {
         float *bp = bias;

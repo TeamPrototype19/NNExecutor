@@ -104,7 +104,7 @@ void Kernel_nn_pool::test_kernel_pool(
             /* Kernel loop
              */
             if( (w+KW) <= (W+PW) && (h+KH) <= (H+PH) ) {
-                float elem = -INFINITY;
+                float elem = -NFDBITS;
                 int   elem_cnt = 0;
 
                 //std::cout << "[" << dbg_out_cnt++ << "]\t";

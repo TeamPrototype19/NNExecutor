@@ -2,6 +2,7 @@
 #include "log.h"
 
 #include <iomanip>
+#include <cmath>
 
 namespace NNFramework {
 

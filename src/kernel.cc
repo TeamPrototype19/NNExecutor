@@ -6,6 +6,9 @@ namespace NNFramework {
 std::map<int, Kernel*> KernelList;
 
 void Kernel::dump_data(string filename, char *data, int data_num, int data_size) {
+    if( data_size == 0 )
+        return;
+
     /* File open
      */
     std::ofstream ofs;

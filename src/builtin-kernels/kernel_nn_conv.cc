@@ -5,6 +5,8 @@
 
 namespace NNFramework {
 
+#define CPU_THREAD_NUM 1
+
 Kernel_nn_conv kernel_nn_conv;
 
 Kernel_nn_conv::Kernel_nn_conv(void) : Kernel() {
@@ -66,6 +68,9 @@ int Kernel_nn_conv::decode_fb_data(const Conv *opinfo) {
     _weight_size = opinfo->weight()->size();
     _bias_size = opinfo->bias()->size();
 
+    if( _weight_size == 0 ) _weight = nullptr;
+    if( _bias_size   == 0 ) _bias = nullptr;
+
     get_itile_info( opinfo->itile() );
     get_otile_info( opinfo->otile() );
 
@@ -114,7 +119,7 @@ void Kernel_nn_conv::creates_threads(void)
     int oC = _otinfo[0].dim[1];
     int oH = _otinfo[0].dim[2];
     int oW = _otinfo[0].dim[3];
-    int oC_t = (oC + 3) / 4;
+    int oC_t = (oC + (CPU_THREAD_NUM-1)) / CPU_THREAD_NUM;
 
     int t_ot_mem_addr = oN * oC_t * oH * oW;
     int t_weight_addr = _kernel_size_h * _kernel_size_w * iC * oC_t;
@@ -125,7 +130,7 @@ void Kernel_nn_conv::creates_threads(void)
 
     /* Creates CPU kernel threads
      */
-    for(int i = 0; i < 4 ; i++) {
+    for(int i = 0; i < CPU_THREAD_NUM; i++) {
         KernelArgs_t arg;
         tileinfo_t iti, oti;
         // input/output tile info
@@ -146,8 +151,12 @@ void Kernel_nn_conv::creates_threads(void)
         thread_args_list.push_back( arg );
     }
 
-    for(int i = 0; i < 4 ; i++)
+#if 0
+    for(int i = 0; i < CPU_THREAD_NUM ; i++)
         thread_list.push_back( thread(cpu_kernel_wrapper, this, i) );
+#else
+    cpu_kernel_conv3d( 0 );
+#endif
 
     /* Creates GPU kernel threads
      */
@@ -185,7 +194,7 @@ void Kernel_nn_conv::cpu_kernel_conv3d(
     float *bias   = args.bias;
 
     for(int n = 0 ; n < N ; n++) {
-        float *bp = bias;
+    float *bp = bias;
     for(int o = 0 ; o < O ; o++) {
 
         /* IFM loop (3D)
@@ -210,7 +219,10 @@ void Kernel_nn_conv::cpu_kernel_conv3d(
                             }
                         }
                     }
-                    *output++ = sum + *bp;
+                    if( _bias_size > 0 )
+                        *output++ = sum + *bp;
+                    else
+                        *output++ = sum;
                 }
             }
         }

@@ -33,6 +33,9 @@ int Kernel_nn_memalloc::postProc(void) {
 int Kernel_nn_memalloc::Run( RunContext &rcontext ) {
     rcontext.main_buffer = new char [ _total_buff_size ];
 
+    if( rcontext.main_buffer == nullptr )
+        throw runtime_error("[ERROR] memory allcation is failed at MemAlloc kernel.");
+
     return 0;
 }
 
@@ -40,11 +43,10 @@ int Kernel_nn_memalloc::decode_fb_data(const MemAlloc *opinfo) {
     _kernel_name = opinfo->kernel_name()->c_str();
     _total_buff_size = opinfo->total_buff_size();
 
-#if LOG_LEVEL > 1
+
     logfs << "-------- Kernel_opinfo fb data decode result --------\n";
     logfs << "name           = " << _kernel_name << "\n";
     logfs << "total_buf_size = " << _total_buff_size << "\n";
-#endif
     
     return 0;
 }

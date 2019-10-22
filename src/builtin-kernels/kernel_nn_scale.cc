@@ -60,6 +60,9 @@ int Kernel_nn_scale::decode_fb_data(const Scale *opinfo) {
     _weight_size = opinfo->weight()->size();
     _bias_size = opinfo->bias()->size();
 
+    if( _weight_size == 0 ) _weight = nullptr;
+    if( _bias_size   == 0 ) _bias = nullptr;
+
     get_itile_info( opinfo->itile() );
     get_otile_info( opinfo->otile() );
 

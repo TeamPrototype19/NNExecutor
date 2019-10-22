@@ -22,8 +22,11 @@ public:
     int preProc( const Instruction * ) override;
     int postProc(void) override;
     int Run( RunContext &rcontext ) override;
-    static void cpu_kernel_wrapper(Kernel_nn_conv *handle, int arg_index) {
+    static void cpu_kernel_thread_wrapper(Kernel_nn_conv *handle, int arg_index) {
         handle->cpu_kernel_conv3d( arg_index );
+    }
+    static void gpu_kernel_thread_wrapper(Kernel_nn_conv *handle, int arg_index) {
+        handle->gpu_kernel_conv3d( arg_index );
     }
 
 private:
@@ -49,11 +52,20 @@ private:
     float *_weight;
     float *_bias;
 
+    vector<KernelArgs_t> kernel_args_list;
+    void create_kernel_args_list(
+        int thread_num_cpu,
+        int thread_num_gpu,
+        int thread_ratio_cpu,
+        int thread_ratio_gpu);
+    void run_kernel();
+
     /* Thread related members
      */
-    vector<thread>       thread_list;
-    vector<KernelArgs_t> thread_args_list;
-    void creates_threads(void);
+    vector<thread>  thread_list;
+    vector<int>     cpu_thread_arg_index;
+    vector<int>     gpu_thread_arg_index;
+    void create_threads(void);
     void wait_threads(void);
 
     /* Flatbuffer decoder

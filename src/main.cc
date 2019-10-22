@@ -64,8 +64,8 @@ int main(int argc, char **argv) {
         cout << "Executing...\n";
         nne.run();
 
-        nne.set_output_data( obuf, obsize );
-        writeBinaryData( obuf, obsize, outputFileName );
+        //nne.set_output_data( obuf, obsize );
+        //writeBinaryData( obuf, obsize, outputFileName );
     }
     catch (const exception& e) {
         cout << e.what() << "\n";

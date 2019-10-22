@@ -27,8 +27,6 @@ int Kernel_nn_fc::preProc( const Instruction *inst ) {
 }
 
 int Kernel_nn_fc::postProc(void) {
-    // DEBUG
-    dump_data( _kernel_name+"_o.dat", (char*)_output, _output_size, sizeof(float));
     logfs << "\n";
     return 0;
 }
@@ -43,6 +41,9 @@ int Kernel_nn_fc::Run( RunContext &rcontext ) {
     dump_data( _kernel_name+"_b.dat", (char*)_bias, _bias_size, sizeof(float));
 
     test_kernel_fc( (float*)_output, (float*)_input, _weight, _bias );
+
+    // DEBUG
+    dump_data( _kernel_name+"_o.dat", (char*)_output, _output_size, sizeof(float));
 
     return 0;
 }

@@ -14,19 +14,21 @@ void writeBinaryData(char* &buf, int &size, std::string filename);
 
 int main(int argc, char **argv) {
 	char option;
-	const char *optstring = "p:i:o:";
+	const char *optstring = "p:i:o:r";
 
     open_log_file("log.txt");
 
     /* Parsing Command arguments
      */
-	if( argc != 7 ) {
-        std::cerr << "Not enough inputs." << std::endl;
-        std::cerr << "nne -p [instruction packets] -i [input file name] -o [output file name]" << std::endl;
+	if( argc < 7 || argc > 8) {
+        std::cerr << "[ERROR] Not enough inputs." << std::endl;
+        std::cerr << "nne -p [instruction packets] -i [input file name] -o [output file name]\n";
+        std::cerr << "(optional) -r: Don't run kernels (only decode compiler output).\n";
         logfs << "[ERROR] invalid command arguments.\n";
 		return -1;
 	}
 
+    NNFramework::ExecOpt exec_opt;
     std::string packetFileName = "ipacket.cgo";
     std::string inputFileName = "input.dat";
     std::string outputFileName = "output.dat";
@@ -38,6 +40,8 @@ int main(int argc, char **argv) {
 			case 'i':	inputFileName = optarg;
 						break;
 			case 'o':	outputFileName = optarg;
+						break;
+			case 'r':	exec_opt.do_not_run_kernel = true;
 						break;
 		}
 	}
@@ -52,7 +56,7 @@ int main(int argc, char **argv) {
         char *ibuf = nullptr, *obuf = nullptr;
         int ibsize, obsize;
 
-        NNFramework::NNExecutor nne( packetFileName );
+        NNFramework::NNExecutor nne( packetFileName, exec_opt );
 
         readBinaryData( ibuf, ibsize, inputFileName );
         nne.set_input_data( ibuf, ibsize );

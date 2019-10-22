@@ -9,9 +9,13 @@ using namespace std;
 
 namespace NNFramework {
 
+typedef struct _ExecOpt {
+    bool   do_not_run_kernel = false;
+} ExecOpt;
+
 class NNExecutor {
 public:
-    NNExecutor(string cgo_file_name);
+    NNExecutor(string cgo_file_name, ExecOpt eopt);
     ~NNExecutor();
 
     void set_input_data(char *in, int &size);
@@ -26,6 +30,7 @@ private:
     int    _cgo_buf_size;
     const NNFramework::InstPacket* cgo;
     RunContext rcontext;
+    const ExecOpt  _eopt;
 };
 
 }

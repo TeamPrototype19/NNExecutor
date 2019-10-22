@@ -6,7 +6,7 @@ using namespace std;
 
 namespace NNFramework {
 
-NNExecutor::NNExecutor(string cgo_file_name) {
+NNExecutor::NNExecutor(string cgo_file_name, ExecOpt eopt) : _eopt(eopt) {
     /* flat buffer file open 
      */
     ifstream fbfile;
@@ -78,7 +78,8 @@ void NNExecutor::run(void) {
         /* Executing kernel 
          */
         khandler->preProc( inst );
-        khandler->Run( rcontext );
+        if( _eopt.do_not_run_kernel == false )
+            khandler->Run( rcontext );
         khandler->postProc();
 
         cout << "opname = " << khandler->get_kernel_name() << "\n";

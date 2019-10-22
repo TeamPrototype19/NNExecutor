@@ -45,7 +45,7 @@ int Kernel_nn_conv::Run( RunContext &rcontext ) {
 
     /* Generates kernel threads 
      */
-    create_kernel_args_list( 4, 1, 1, 0 );
+    create_kernel_args_list( 1, 0, 1, 0 );
     //create_threads();
     run_kernel();
     wait_threads();
@@ -172,7 +172,7 @@ void Kernel_nn_conv::create_kernel_args_list(
         arg.iti    = iti;
         arg.oti    = oti;
 
-        arg.output = (float*) (_output + oti.mem_addr);
+        arg.output = (float*) (_output + och_base_addr_cpu + (och_offset_per_Cthread * i));
         arg.input  = (float*) _input;
         arg.weight = _weight + wgt_base_addr_cpu  + (wgt_offset_per_Cthread * i);
         arg.bias   = _bias   + bias_base_addr_cpu + (bias_offset_per_Cthread * i);
@@ -180,6 +180,40 @@ void Kernel_nn_conv::create_kernel_args_list(
         kernel_args_list.push_back( arg );
         cpu_thread_arg_index.push_back( arg_idx );
     }
+
+
+#if 1
+    logfs << "---------------- Kernel_args list ---------------------\n";
+    logfs << "thread_num_cpu   = " << thread_num_cpu << "\n";
+    logfs << "thread_num_gpu   = " << thread_num_gpu << "\n";
+    logfs << "thread_ratio_cpu = " << thread_ratio_cpu << "\n";
+    logfs << "thread_ratio_gpu = " << thread_ratio_gpu << "\n";
+    int j = 0;
+    for(j = 0; j < thread_num_cpu ; j++) {
+        auto a = kernel_args_list[ j ];
+        logfs << "+++++ CPU thread info [" << j << "] +++++\n";
+        logfs << "output = 0x" << std::setw(8) << std::setfill('0') << std::hex \
+              << a.output << std::setfill(' ') << std::dec << "\n";
+        logfs << "input  = 0x" << std::setw(8) << std::setfill('0') << std::hex \
+              << a.input  << std::setfill(' ') << std::dec << "\n";
+        logfs << "weight = 0x" << std::setw(8) << std::setfill('0') << std::hex \
+              << a.weight << std::setfill(' ') << std::dec << "\n";
+        logfs << "bias   = 0x" << std::setw(8) << std::setfill('0') << std::hex \
+              << a.bias   << std::setfill(' ') << std::dec << "\n";
+        logfs << "it.addr= 0x" << std::setw(8) << std::setfill('0') << std::hex \
+              << a.iti.mem_addr << std::setfill(' ') << std::dec << "\n";
+        logfs << "it.dim = [";
+        for(unsigned int k = 0; k < a.iti.dim.size()-1; k++)
+            logfs << a.iti.dim[k] << ",";
+        logfs << a.iti.dim.back() << "]\n";
+        logfs << "ot.addr= 0x" << std::setw(8) << std::setfill('0') << std::hex \
+              << a.oti.mem_addr << std::setfill(' ') << std::dec << "\n";
+        logfs << "ot.dim = [";
+        for(unsigned int k = 0; k < a.oti.dim.size()-1; k++)
+            logfs << a.oti.dim[k] << ",";
+        logfs << a.oti.dim.back() << "]\n";
+    }
+#endif
 
 
     /* Creates kernel argument list for GPU
@@ -215,6 +249,35 @@ void Kernel_nn_conv::create_kernel_args_list(
         kernel_args_list.push_back( arg );
         gpu_thread_arg_index.push_back( arg_idx );
     }
+
+#if 1
+    int j = thread_num_cpu;
+    for(j = 0; j < thread_num_total; j++) {
+        auto a = kernel_args_list[ j ];
+        logfs << "+++++ GPU thread info [" << j << "] +++++\n";
+        logfs << "output = 0x" << std::setw(8) << std::setfill('0') << std::hex \
+              << a.output << std::setfill(' ') << std::dec << "\n";
+        logfs << "input  = 0x" << std::setw(8) << std::setfill('0') << std::hex \
+              << a.input  << std::setfill(' ') << std::dec << "\n";
+        logfs << "weight = 0x" << std::setw(8) << std::setfill('0') << std::hex \
+              << a.weight << std::setfill(' ') << std::dec << "\n";
+        logfs << "bias   = 0x" << std::setw(8) << std::setfill('0') << std::hex \
+              << a.bias   << std::setfill(' ') << std::dec << "\n";
+        logfs << "it.addr= 0x" << std::setw(8) << std::setfill('0') << std::hex \
+              << a.iti.mem_addr << std::setfill(' ') << std::dec << "\n";
+        logfs << "it.dim = [";
+        for(unsigned int k = 0; k < a.iti.dim.size()-1; k++)
+            logfs << a.iti.dim[k] << ",";
+        logfs << a.iti.dim.back() << "]\n";
+        logfs << "ot.addr= 0x" << std::setw(8) << std::setfill('0') << std::hex \
+              << a.oti.mem_addr << std::setfill(' ') << std::dec << "\n";
+        logfs << "ot.dim = [";
+        for(unsigned int k = 0; k < a.oti.dim.size()-1; k++)
+            logfs << a.oti.dim[k] << ",";
+        logfs << a.oti.dim.back() << "]\n";
+    }
+#endif
+
 
     return;
 }

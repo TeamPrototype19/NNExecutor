@@ -182,7 +182,7 @@ void Kernel_nn_conv::create_kernel_args_list(
     }
 
 
-#if 1
+#if 0
     logfs << "---------------- Kernel_args list ---------------------\n";
     logfs << "thread_num_cpu   = " << thread_num_cpu << "\n";
     logfs << "thread_num_gpu   = " << thread_num_gpu << "\n";
@@ -250,8 +250,8 @@ void Kernel_nn_conv::create_kernel_args_list(
         gpu_thread_arg_index.push_back( arg_idx );
     }
 
-#if 1
-    int j = thread_num_cpu;
+#if 0
+    j = thread_num_cpu;
     for(j = 0; j < thread_num_total; j++) {
         auto a = kernel_args_list[ j ];
         logfs << "+++++ GPU thread info [" << j << "] +++++\n";

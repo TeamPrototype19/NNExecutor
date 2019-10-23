@@ -45,8 +45,9 @@ int Kernel_nn_conv::Run( RunContext &rcontext ) {
 
     /* Generates kernel threads 
      */
-    create_kernel_args_list( 1, 0, 1, 0 );
+    //create_kernel_args_list( 4, 0, 1, 0 );
     //create_threads();
+    create_kernel_args_list( 1, 0, 1, 0 );
     run_kernel();
     wait_threads();
 
@@ -356,10 +357,7 @@ void Kernel_nn_conv::cpu_kernel_conv3d(
                             }
                         }
                     }
-                    if( _bias_size > 0 )
-                        *output++ = sum + *bp;
-                    else
-                        *output++ = sum;
+                    *output++ = sum + *bp;
                 }
             }
         }

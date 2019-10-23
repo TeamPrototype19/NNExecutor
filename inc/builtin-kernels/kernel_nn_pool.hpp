@@ -26,6 +26,7 @@ private:
     int _stride_size_h;
     int _pad_size_w;
     int _pad_size_h;
+    bool _global_pooling;
 
     int decode_fb_data(const Pooling *);
 };

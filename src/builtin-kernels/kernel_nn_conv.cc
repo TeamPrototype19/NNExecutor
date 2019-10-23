@@ -153,16 +153,12 @@ void Kernel_nn_conv::create_kernel_args_list(
 
     /* Creates kernel argument list for CPU
      */
-    //int oC_t = (och_by_cpu + (thread_num_cpu-1)) / thread_num_cpu;
-    //int t_weight_addr = _kernel_size_h * _kernel_size_w * iC * oC_t;
-    //int t_bias_addr   = oC_t;
-    //t_ot_mem_addr *= sizeof(float);
     int och_per_Cthread = (och_by_cpu + (thread_num_cpu-1)) / thread_num_cpu;
     int och_offset_per_Cthread = oN * (oH * oW) * och_per_Cthread * sizeof(float);
     int wgt_offset_per_Cthread = (_kernel_size_h * _kernel_size_w) * iC * och_per_Cthread;
     int bias_offset_per_Cthread = och_per_Cthread;
 
-    int oC_org = oC;
+    int oC_org = och_by_cpu;
     int arg_idx = 0;
     for(int i = 0; arg_idx < thread_num_cpu; arg_idx++, i++) {
         KernelArgs_t arg;
@@ -231,7 +227,7 @@ void Kernel_nn_conv::create_kernel_args_list(
     int wgt_offset_per_Gthread = (_kernel_size_h * _kernel_size_w) * iC * och_per_Gthread;
     int bias_offset_per_Gthread = och_per_Gthread;
 
-    oC_org = oC;
+    oC_org = och_by_gpu;
     int thread_num_total = thread_num_cpu + thread_num_gpu;
     for(int i = 0; arg_idx < thread_num_total; arg_idx++, i++) {
         KernelArgs_t arg;

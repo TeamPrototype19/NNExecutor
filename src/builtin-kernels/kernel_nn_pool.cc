@@ -27,8 +27,6 @@ int Kernel_nn_pool::preProc( const Instruction *inst ) {
 }
 
 int Kernel_nn_pool::postProc(void) {
-    // DEBUG
-    dump_data( _kernel_name+"_o.dat", (char*)_output, _output_size, sizeof(float));
     logfs << "\n";
     return 0;
 }
@@ -41,6 +39,9 @@ int Kernel_nn_pool::Run( RunContext &rcontext ) {
     dump_data( _kernel_name+"_i.dat", _input, _input_size, sizeof(float));
 
     test_kernel_pool( (float*)_output, (float*)_input );
+
+    // DEBUG
+    dump_data( _kernel_name+"_o.dat", (char*)_output, _output_size, sizeof(float));
 
     return 0;
 }
@@ -55,6 +56,7 @@ int Kernel_nn_pool::decode_fb_data(const Pooling *opinfo) {
     _stride_size_h = opinfo->stride_size_h();
     _pad_size_w = opinfo->pad_size_w();
     _pad_size_h = opinfo->pad_size_h();
+    _global_pooling = opinfo->global_pooling();
 
     get_itile_info( opinfo->itile() );
     get_otile_info( opinfo->otile() );
@@ -95,6 +97,28 @@ void Kernel_nn_pool::test_kernel_pool(
 
     int TP = 0;//pinfo.pool_type;
     //int GP = pinfo.global_pooling;
+    
+
+    if( _global_pooling ) {
+        int size = W*H;
+        for(int n = 0 ; n < N ; n++) {
+        for(int c = 0 ; c < C ; c++) {
+            if( TP == 0 ) { // MAX_POOL
+                float elem = -NFDBITS;
+                for(int i = 0; i < size; i++, input++)
+                    elem = (elem < *input) ? *input : elem;
+                *output++ = elem;
+            }
+            else if( TP == 1 ) { // AVG_POOL
+                float elem = -NFDBITS;
+                for(int i = 0; i < size; i++, input++)
+                    elem += *input;
+                *output++ = elem / (float)size;
+            }
+        }
+        }
+        return;
+    }
 
     for(int n = 0 ; n < N ; n++) {
     for(int c = 0 ; c < C ; c++) {

@@ -45,10 +45,13 @@ int Kernel_nn_conv::Run( RunContext &rcontext ) {
 
     /* Generates kernel threads 
      */
-    //create_kernel_args_list( 4, 0, 1, 0 );
-    //create_threads();
+#if 1   // multi-thread mode (CPU-only)
+    create_kernel_args_list( 4, 0, 1, 0 );
+    create_threads();
+#else   // singletone mode
     create_kernel_args_list( 1, 0, 1, 0 );
     run_kernel();
+#endif
     wait_threads();
 
     // DEBUG
@@ -71,6 +74,7 @@ int Kernel_nn_conv::decode_fb_data(const Conv *opinfo) {
     _bias = (float*)opinfo->bias()->data();
     _weight_size = opinfo->weight()->size();
     _bias_size = opinfo->bias()->size();
+    _relu_op_en = opinfo->relu_op_en();
 
     if( _weight_size == 0 ) _weight = nullptr;
     if( _bias_size   == 0 ) _bias = nullptr;
@@ -91,6 +95,7 @@ int Kernel_nn_conv::decode_fb_data(const Conv *opinfo) {
     logfs << "pad_size_h     = " << _pad_size_h    << "\n";
     logfs << "weight_size    = " << _weight_size << "\n";
     logfs << "bias_size      = " << _bias_size << "\n";
+    logfs << "relu_op_en     = " << _relu_op_en << "\n";
     display_tile_info( logfs );
    
     return 0;
@@ -331,38 +336,76 @@ void Kernel_nn_conv::cpu_kernel_conv3d(
     float *weight = args.weight;
     float *bias   = args.bias;
 
-    for(int n = 0 ; n < N ; n++) {
-    float *bp = bias;
-    for(int o = 0 ; o < O ; o++) {
+    if( _relu_op_en ) {
+        for(int n = 0 ; n < N ; n++) {
+        float *bp = bias;
+        for(int o = 0 ; o < O ; o++) {
 
-        /* IFM loop (3D)
-         */
-        for(int h = -PH ; h < (H+PH) ; h += SH) {
-            for(int w = -PW ; w < (W+PW) ; w += SW) {
+            /* IFM loop (3D)
+             */
+            for(int h = -PH ; h < (H+PH) ; h += SH) {
+                for(int w = -PW ; w < (W+PW) ; w += SW) {
 
-                /* Kernel loop
-                 */
-                if( (w+KW) <= (W+PW) && (h+KH) <= (H+PH) ) {
-                    float sum = 0;
-                    for(int c = 0 ; c < C ; c++) {
-                        for(int kh = 0 ; kh < KH ; kh++) {
-                            if( (h+kh) >= 0 && (h+kh) < H ) {
-                                float *inp = input + (W*(h+kh)) + (W*H*c) + w + (C*H*W*n);
-                                float *wgt = weight + (KW*kh) + (KW*KH*c) + (KW*KH*C*o);
-                                for(int kw = 0 ; kw < KW ; kw++) {
-                                    if( (w+kw) >= 0 && (w+kw) < W )
-                                        sum += (*inp) * (*wgt++);
-                                    inp++;
+                    /* Kernel loop
+                     */
+                    if( (w+KW) <= (W+PW) && (h+KH) <= (H+PH) ) {
+                        float sum = 0;
+                        for(int c = 0 ; c < C ; c++) {
+                            for(int kh = 0 ; kh < KH ; kh++) {
+                                if( (h+kh) >= 0 && (h+kh) < H ) {
+                                    float *inp = input + (W*(h+kh)) + (W*H*c) + w + (C*H*W*n);
+                                    float *wgt = weight + (KW*kh) + (KW*KH*c) + (KW*KH*C*o);
+                                    for(int kw = 0 ; kw < KW ; kw++) {
+                                        if( (w+kw) >= 0 && (w+kw) < W )
+                                            sum += (*inp) * (*wgt++);
+                                        inp++;
+                                    }
                                 }
                             }
                         }
+                        sum += *bp;
+                        *output++ = (sum < 0) ? 0 : sum;    // _relu_op_en = true case
                     }
-                    *output++ = sum + *bp;
                 }
             }
+            bp++;
         }
-        bp++;
+        }
     }
+    else {
+        for(int n = 0 ; n < N ; n++) {
+        float *bp = bias;
+        for(int o = 0 ; o < O ; o++) {
+
+            /* IFM loop (3D)
+             */
+            for(int h = -PH ; h < (H+PH) ; h += SH) {
+                for(int w = -PW ; w < (W+PW) ; w += SW) {
+
+                    /* Kernel loop
+                     */
+                    if( (w+KW) <= (W+PW) && (h+KH) <= (H+PH) ) {
+                        float sum = 0;
+                        for(int c = 0 ; c < C ; c++) {
+                            for(int kh = 0 ; kh < KH ; kh++) {
+                                if( (h+kh) >= 0 && (h+kh) < H ) {
+                                    float *inp = input + (W*(h+kh)) + (W*H*c) + w + (C*H*W*n);
+                                    float *wgt = weight + (KW*kh) + (KW*KH*c) + (KW*KH*C*o);
+                                    for(int kw = 0 ; kw < KW ; kw++) {
+                                        if( (w+kw) >= 0 && (w+kw) < W )
+                                            sum += (*inp) * (*wgt++);
+                                        inp++;
+                                    }
+                                }
+                            }
+                        }
+                        *output++ = sum + *bp;
+                    }
+                }
+            }
+            bp++;
+        }
+        }
     }
 }
 

@@ -51,6 +51,7 @@ private:
     int _bias_size;
     float *_weight;
     float *_bias;
+    bool _relu_op_en;
 
     vector<KernelArgs_t> kernel_args_list;
     void create_kernel_args_list(

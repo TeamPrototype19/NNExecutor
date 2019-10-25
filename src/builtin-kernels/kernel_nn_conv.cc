@@ -390,8 +390,9 @@ void Kernel_nn_conv::cpu_kernel_conv3d(
                                     float *wgt = weight + (KW*kh) + (KW*KH*c) + (KW*KH*C*o);
                                     for(int kw = 0 ; kw < KW ; kw++) {
                                         if( (w+kw) >= 0 && (w+kw) < W )
-                                            sum += (*inp) * (*wgt++);
+                                            sum += (*inp) * (*wgt);
                                         inp++;
+                                        wgt++;
                                     }
                                 }
                             }

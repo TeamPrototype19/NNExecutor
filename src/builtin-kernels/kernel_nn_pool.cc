@@ -57,6 +57,7 @@ int Kernel_nn_pool::decode_fb_data(const Pooling *opinfo) {
     _pad_size_w = opinfo->pad_size_w();
     _pad_size_h = opinfo->pad_size_h();
     _global_pooling = opinfo->global_pooling();
+    _pooling_type = opinfo->oper_type();
 
     get_itile_info( opinfo->itile() );
     get_otile_info( opinfo->otile() );
@@ -72,6 +73,8 @@ int Kernel_nn_pool::decode_fb_data(const Pooling *opinfo) {
     logfs << "stride_size_h  = " << _stride_size_h << "\n";
     logfs << "pad_size_w     = " << _pad_size_w    << "\n";
     logfs << "pad_size_h     = " << _pad_size_h    << "\n";
+    logfs << "global_pooling = " << _global_pooling << "\n";
+    logfs << "pooling_type   = " << _pooling_type << "\n";
     display_tile_info( logfs );
  
     return 0;
@@ -95,21 +98,19 @@ void Kernel_nn_pool::test_kernel_pool(
     int PW = _pad_size_w;
     int PH = _pad_size_h;
 
-    int TP = 0;//pinfo.pool_type;
-    //int GP = pinfo.global_pooling;
-    
+    assert( _pooling_type < 3 );
 
     if( _global_pooling ) {
         int size = W*H;
         for(int n = 0 ; n < N ; n++) {
         for(int c = 0 ; c < C ; c++) {
-            if( TP == 0 ) { // MAX_POOL
+            if( _pooling_type == 0 ) { // MAX_POOL
                 float elem = -NFDBITS;
                 for(int i = 0; i < size; i++, input++)
                     elem = (elem < *input) ? *input : elem;
                 *output++ = elem;
             }
-            else if( TP == 1 ) { // AVG_POOL
+            else if( _pooling_type == 1 ) { // AVG_POOL
                 float elem = -NFDBITS;
                 for(int i = 0; i < size; i++, input++)
                     elem += *input;
@@ -128,31 +129,29 @@ void Kernel_nn_pool::test_kernel_pool(
             /* Kernel loop
              */
             if( (w+KW) <= (W+PW) && (h+KH) <= (H+PH) ) {
-                float elem = -NFDBITS;
+                float elem = (_pooling_type==0) ? -NFDBITS : 0;
                 int   elem_cnt = 0;
 
                 //std::cout << "[" << dbg_out_cnt++ << "]\t";
 
                 for(int kh = 0 ; kh < KH ; kh++) {
-                    if( (h+kh) >= 0 && (h+kh) < H ) {
-                        float *inp = input + (W*(h+kh)) + (W*H*c) + w + (C*H*W*n);
-                        for(int kw = 0 ; kw < KW ; kw++) {
-                            if( (w+kw) >= 0 && (w+kw) < W ) {
-                                if( TP == 0 ) { // MAX_POOL
-                                    elem = (elem < (*inp)) ? (*inp) : elem;
-                                    //std::cout << *inp << "\t";
-                                }
-                                else if( TP == 1 ) { // AVG_POOL
-                                    elem += (*inp);
-                                    elem_cnt++;
-                                }
+                    float *inp = input + (W*(h+kh)) + (W*H*c) + w + (C*H*W*n);
+                    for(int kw = 0 ; kw < KW ; kw++) {
+                        if( ((w+kw) >= 0 && (w+kw) < W) && ((h+kh) >= 0 && (h+kh) < H) ) {
+                            if( _pooling_type == 0 ) { // MAX_POOL
+                                elem = (elem < (*inp)) ? (*inp) : elem;
                             }
-                            inp++;
+                            else if( _pooling_type == 1 ) { // AVG_POOL
+                                elem += (*inp);
+                                //elem_cnt++;
+                            }
                         }
+                        inp++;
+                        elem_cnt++;
                     }
                 }
 
-                if( TP == 1 )
+                if( _pooling_type == 1 )
                     elem /= (float)elem_cnt;
 
                 *output++ = elem;

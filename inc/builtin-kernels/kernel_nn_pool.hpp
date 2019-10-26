@@ -27,6 +27,7 @@ private:
     int _pad_size_w;
     int _pad_size_h;
     bool _global_pooling;
+    int  _pooling_type; // 0: MAX, 1: AVE, 2: STOCHASTIC
 
     int decode_fb_data(const Pooling *);
 };

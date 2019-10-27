@@ -115,10 +115,12 @@ void Kernel_nn_concat::create_kernel_args_list(void)
     /* Creates kernel argument list for CPU
      */
     vector<int> thr_out_addr_offset;
-    thr_out_addr_offset.push_back( 0 );
+    int last_offset = 0;
+    thr_out_addr_offset.push_back( last_offset );
     for(unsigned int i = 0; i < _itinfo.size()-1; i++) {
         tileinfo_t t;
-        thr_out_addr_offset.push_back( t.total_size( _itinfo[i].dim ) * sizeof(float) );
+        last_offset += t.total_size( _itinfo[i].dim ) * sizeof(float);
+        thr_out_addr_offset.push_back( last_offset );
     }
 
     for(unsigned int i = 0; i < _itinfo.size(); i++) {
@@ -199,6 +201,11 @@ void Kernel_nn_concat::cpu_kernel_concat(
 ) {
 
     auto& args = kernel_args_list[ args_list_index ];
+    logfs << "output = 0x" << std::setw(8) << std::setfill('0') << std::hex \
+          << args.output << std::setfill(' ') << std::dec << "\n";
+    logfs << "input  = 0x" << std::setw(8) << std::setfill('0') << std::hex \
+          << args.input << std::setfill(' ') << std::dec << "\n";
+
     int N = args.iti.dim[0];
     int C = args.iti.dim[1];
     int H = args.iti.dim[2];

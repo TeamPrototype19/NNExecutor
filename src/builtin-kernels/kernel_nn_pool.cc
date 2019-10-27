@@ -111,7 +111,7 @@ void Kernel_nn_pool::test_kernel_pool(
                 *output++ = elem;
             }
             else if( _pooling_type == 1 ) { // AVG_POOL
-                float elem = -NFDBITS;
+                float elem = 0;
                 for(int i = 0; i < size; i++, input++)
                     elem += *input;
                 *output++ = elem / (float)size;

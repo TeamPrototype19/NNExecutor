@@ -131,7 +131,7 @@ echo "###### Inception V3 vector matching ######"
 ./fchksnr -t to_iv3/inception_c2_concat_o.dat      -r tv_iv3/tv_inception_c2_concat_o.dat            -R to_iv3/report_inception_c2_concat.txt     -n inception_c2_concat
 
 ./fchksnr -t to_iv3/pool_8x8_s1_o.dat              -r tv_iv3/tv_pool_8x8_s1_o.dat                    -R to_iv3/report_pool_8x8_s1.txt             -n pool_8x8_s1
-./fchksnr -t to_iv3/classfier_o.dat                -r tv_iv3/tv_classifier_o.dat                     -R to_iv3/report_classifier.txt              -n classifier
+./fchksnr -t to_iv3/classifier_o.dat               -r tv_iv3/tv_classifier_o.dat                     -R to_iv3/report_classifier.txt              -n classifier
 ./fchksnr -t to_iv3/prob_o.dat                     -r tv_iv3/tv_prob_o.dat                           -R to_iv3/report_prob.txt                    -n prob
 
 

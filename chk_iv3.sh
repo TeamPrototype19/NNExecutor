@@ -135,8 +135,8 @@ echo "###### Inception V3 vector matching ######"
 ./fchksnr -t to_iv3/prob_o.dat                     -r tv_iv3/tv_prob_o.dat                           -R to_iv3/report_prob.txt                    -n prob
 
 
-echo "/*-----------------------------------------------------------------*" >  rpt_iv3.txt
-echo " * NN GRAPH ACCURACY CHECK REPORT                                  *" >> rpt_iv3.txt
+echo "/*---------------------------------------------------------------------------*" >  rpt_iv3.txt
+echo " * NN GRAPH ACCURACY CHECK REPORT                                            *" >> rpt_iv3.txt
 grep Final  to_iv3/report_conv1_3x3_s2_i.txt                   >> rpt_iv3.txt 
 grep Final  to_iv3/report_conv1_3x3_s2.txt                     >> rpt_iv3.txt 
 grep Final  to_iv3/report_conv2_3x3_s1.txt                     >> rpt_iv3.txt 
@@ -270,6 +270,6 @@ grep Final  to_iv3/report_inception_c2_concat.txt              >> rpt_iv3.txt
 grep Final  to_iv3/report_pool_8x8_s1.txt                      >> rpt_iv3.txt 
 grep Final  to_iv3/report_classifier.txt                       >> rpt_iv3.txt 
 grep Final  to_iv3/report_prob.txt                             >> rpt_iv3.txt 
-echo " *-----------------------------------------------------------------*/" >> rpt_iv3.txt
+echo " *---------------------------------------------------------------------------*/" >> rpt_iv3.txt
 
-more rpt_iv3.txt
+#more rpt_iv3.txt

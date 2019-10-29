@@ -8,11 +8,34 @@
 
 #include "log.h"
 #include "nnexec.hpp"
+#include "ssg_kernel.h"
 
 void readBinaryData(char* &buf, int &size, std::string filename);
 void writeBinaryData(char* &buf, int &size, std::string filename);
 
 int main(int argc, char **argv) {
+ /*
+    int weight_h = 25;
+    int weight_w = 30;
+    int img_n =100;
+    int img_c = 1;
+    int img_h = 28;
+    int img_w = 28;
+    int f_n =30;
+    int f_c =1;
+    int f_h=5;
+    int f_w=5;
+ 
+    float * img_in = new float[img_n*img_c*img_h*img_w];
+    float * weight_in = new float[weight_h*weight_w];
+    float * b_in = new float[weight_w];
+    float * col_out = new float[1440000];
+    ssg_kernel mkernel(img_in,img_w,img_h,img_c,img_n,weight_in,weight_w,weight_h,b_in,col_out);
+    mkernel.get_cl_info();
+    mkernel.init_device();
+    mkernel.compile_program();
+
+*/
 	char option;
 	const char *optstring = "p:i:o:r";
 

@@ -2,6 +2,7 @@
 #include "log.h"
 
 #include <iomanip>
+#include "ssg_kernel.h"
 
 namespace NNFramework {
 
@@ -31,6 +32,19 @@ int Kernel_nn_conv::preProc( const Instruction *inst ) {
 int Kernel_nn_conv::postProc(void) {
     logfs << "\n";
 
+    const char * tmp_char= _kernel_name.c_str();
+    char  filename[200] ;
+    sprintf(filename,"./to_mnist/%s_out.txt",tmp_char);
+    printf("%s\n",filename);
+
+    FILE * fp_tmp = fopen(filename,"w");
+    float * ptr_out = (float *)_output;
+    for(int iter=0;iter<_output_size;iter++){
+        fprintf(fp_tmp,"%f\n",ptr_out[iter]);
+    }
+
+    fclose(fp_tmp);
+
     return 0;
 }
 
@@ -42,8 +56,85 @@ int Kernel_nn_conv::Run( RunContext &rcontext ) {
     dump_data( _kernel_name+"_i.dat", _input, _input_size, sizeof(float));
     dump_data( _kernel_name+"_w.dat", (char*)_weight, _weight_size, sizeof(float));
     dump_data( _kernel_name+"_b.dat", (char*)_bias, _bias_size, sizeof(float));
+    
 
-    /* Generates kernel threads 
+    int img_n = _itinfo[0].dim[0];
+    int img_c = _itinfo[0].dim[1];//1;
+    int img_h = _itinfo[0].dim[2];//28;
+    int img_w = _itinfo[0].dim[3];//28;
+    int f_n =_otinfo[0].dim[1];//20
+    int f_c =_itinfo[0].dim[1];
+    int f_h=_kernel_size_h;
+    int f_w=_kernel_size_w;
+    int stride_= _stride_size_w;
+    int padding_ =_pad_size_w;
+    int weight_h = _kernel_size_w*_kernel_size_w*img_c;
+    int weight_w = _otinfo[0].dim[1];//20;//
+   
+    float *weight_in = (float *)_weight;
+    float *img_in = (float *) _input;
+    float *b_in = (float *)_bias;
+    float *col_out =(float *)_output; 
+    float * weight_in_ = new float[weight_h*weight_w];
+    
+    for(int h=0;h<weight_h;h++){
+        for(int w=0;w<weight_w;w++){
+            weight_in_[h*weight_w+w]=weight_in[w*weight_h+h];
+        }
+    }
+
+    printf("opencl input\n");
+    for(int iter=0; iter<20;iter++)
+        printf("%f  %f  %f\n",img_in[iter],weight_in[iter],b_in[iter]);
+
+
+    //ssg_kernel mkernel(img_in,img_w,img_h,img_c,img_n,weight_in_,weight_w,weight_h,b_in,col_out);
+    ssg_kernel mkernel(img_in,img_w,img_h,img_c,img_n,weight_in_,weight_w,weight_h,b_in,col_out);
+    //mkernel.get_cl_info();
+    mkernel.init_device();
+    mkernel.compile_program();
+
+    printf("log================================\n");
+    printf("weight_h : %d\n",weight_h);
+    printf("weight_w : %d\n",weight_w);
+    printf("img_n    : %d\n",img_n);
+    printf("img_c    : %d\n",img_c);
+    printf("img_h    : %d\n",img_h);
+    printf("img_w    : %d\n",img_w);
+    printf("f_n      : %d\n",f_n);
+    printf("f_c      : %d\n",f_c);
+    printf("f_h      : %d\n",f_h);
+    printf("f_w      : %d\n",f_w);
+    printf("stride   : %d\n",stride_);
+    printf("padding  : %d\n",padding_);
+    printf("log================================\n");
+    
+ 
+    mkernel.Im2col.im2col_init(f_n,f_h,stride_,padding_,0);
+    mkernel.Im2col.im2col_gpu();
+    mkernel.Gemm.gemm_init();
+    mkernel.Gemm.gemm_cpu();
+    mkernel.Gemm.gemm_gpu();
+
+    float * gemm_out_ = (float *)mkernel.img_in;
+    char tmp_name[200];
+    sprintf(tmp_name,"./to_mnist/%s_gemm_out.txt",_kernel_name.c_str());
+    FILE * fp_gemm_out = fopen(tmp_name,"w");
+    int gemm_out_size_ = mkernel.img_n*mkernel.img_c*mkernel.img_h*mkernel.img_w;
+
+    if(gemm_out_size_ !=_output_size)
+        printf("size miss match!!\n");
+
+    for(int iter =0;iter<_output_size;iter++)
+        fprintf(fp_gemm_out,"%f\n",gemm_out_[iter]);    
+
+    fclose(fp_gemm_out);
+
+
+    printf("finish gemm!!\n");
+    delete [] weight_in_;
+
+    /* Generates kernel threiads 
      */
 #if 1   // multi-thread mode (CPU-only)
     create_kernel_args_list( 4, 0, 1, 0 );
@@ -81,6 +172,17 @@ int Kernel_nn_conv::decode_fb_data(const Conv *opinfo) {
 
     get_itile_info( opinfo->itile() );
     get_otile_info( opinfo->otile() );
+
+
+    //arg.output = (float*) (_output + t_ot_mem_addr * i);
+    //arg.input  = (float*) _input;
+    //arg.weight = _weight + t_weight_addr * i;
+    //arg.bias   = _bias   + t_bias_addr;
+
+    printf("start gpu\n");
+    //for(int iter= 0; iter<10;iter++)
+    //    printf("%f          %f           %f\n",_input[iter],_weight[iter],_bias[iter]);
+
 
 
     /* Print decoded content on log file

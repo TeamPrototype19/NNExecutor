@@ -4,6 +4,7 @@ include_directories(
 	"${CMAKE_CURRENT_SOURCE_DIR}/inc"
 	"${CMAKE_CURRENT_SOURCE_DIR}/inc/builtin-kernels"
 	"${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/flatbuffers/include"
+	"${CMAKE_CURRENT_SOURCE_DIR}/libs"
 )
 file(GLOB SRCS
 	"${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc"
@@ -11,6 +12,9 @@ file(GLOB SRCS
 )
 set(CMAKE_CXX_FLAGS "--std=c++11 -fsigned-char -Wall -Wno-comment -g")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
+
+add_definitions( -DCL_TARGET_OPENCL_VERSION=200)
+link_libraries( mali )
 
 add_custom_command (
 	OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/inc/instPacket_generated.h"

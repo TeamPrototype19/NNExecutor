@@ -27,7 +27,9 @@ int Kernel_nn_scale::preProc( const Instruction *inst ) {
 }
 
 int Kernel_nn_scale::postProc(void) {
+#if LOG_LEVEL > 1
     logfs << "\n";
+#endif
 
     return 0;
 }
@@ -36,10 +38,11 @@ int Kernel_nn_scale::Run( RunContext &rcontext ) {
     _input  = (rcontext.main_buffer + _itinfo[0].mem_addr);
     _output = (rcontext.main_buffer + _otinfo[0].mem_addr);
 
-    // DEBUG
+#if defined(DUMP_LEVEL) && DUMP_LEVEL > 0
     dump_data( _kernel_name+"_i.dat", _input, _input_size, sizeof(float));
     dump_data( _kernel_name+"_w.dat", (char*)_weight, _weight_size, sizeof(float));
     dump_data( _kernel_name+"_b.dat", (char*)_bias, _bias_size, sizeof(float));
+#endif
 
     /* Generates kernel threads 
      */
@@ -52,8 +55,9 @@ int Kernel_nn_scale::Run( RunContext &rcontext ) {
 #endif
     wait_threads();
 
-    // DEBUG
+#if defined(DUMP_LEVEL) && DUMP_LEVEL > 0
     dump_data( _kernel_name+"_o.dat", (char*)_output, _output_size, sizeof(float));
+#endif
 
     return 0;
 }
@@ -74,6 +78,7 @@ int Kernel_nn_scale::decode_fb_data(const Scale *opinfo) {
     get_otile_info( opinfo->otile() );
 
 
+#if LOG_LEVEL > 1
     /* Print decoded content on log file
      */
     logfs << "-------- Kernel_opinfo fb data decode result --------\n";
@@ -81,6 +86,7 @@ int Kernel_nn_scale::decode_fb_data(const Scale *opinfo) {
     logfs << "weight_size    = " << _weight_size << "\n";
     logfs << "bias_size      = " << _bias_size << "\n";
     display_tile_info( logfs );
+#endif
    
     return 0;
 }
@@ -123,9 +129,11 @@ void Kernel_nn_scale::create_kernel_args_list(
     int och_by_cpu = (oC * thread_ratio_cpu) / total_ratio;
     int och_by_gpu = oC - och_by_cpu;
 
+#if LOG_LEVEL > 1
     logfs << "kernel_nn_scale::create_kernel_args_list() debug\n";
     logfs << "oC = " << oC << "\toch_by_cpu = " << och_by_cpu\
           << "\toch_by_gpu = " << och_by_gpu << "\n";
+#endif
 
     int och_base_addr_cpu = 0;
     int och_base_addr_gpu = (oW * oH) * och_by_cpu * sizeof(float);
@@ -170,6 +178,7 @@ void Kernel_nn_scale::create_kernel_args_list(
 
 
 #if 0
+#if LOG_LEVEL > 1
     logfs << "---------------- Kernel_args list ---------------------\n";
     logfs << "thread_num_cpu   = " << thread_num_cpu << "\n";
     logfs << "thread_num_gpu   = " << thread_num_gpu << "\n";
@@ -200,6 +209,7 @@ void Kernel_nn_scale::create_kernel_args_list(
             logfs << a.oti.dim[k] << ",";
         logfs << a.oti.dim.back() << "]\n";
     }
+#endif
 #endif
 
 

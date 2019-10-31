@@ -29,7 +29,9 @@ int Kernel_nn_concat::preProc( const Instruction *inst ) {
 }
 
 int Kernel_nn_concat::postProc(void) {
+#if LOG_LEVEL > 1
     logfs << "\n";
+#endif
 
     return 0;
 }
@@ -39,12 +41,13 @@ int Kernel_nn_concat::Run( RunContext &rcontext ) {
         _input_cc.push_back( rcontext.main_buffer + itinfo.mem_addr);
     _output = (rcontext.main_buffer + _otinfo[0].mem_addr);
 
-    // DEBUG
+#if defined(DUMP_LEVEL) && DUMP_LEVEL > 0
     for(unsigned int i = 0; i < _input_cc.size(); i++) {
         tileinfo_t t;
         int input_size = t.total_size( _itinfo[i].dim );
         dump_data( _kernel_name+"_i"+std::to_string(i)+".dat", _input_cc[i], input_size, sizeof(float));
     }
+#endif
 
     /* Generates kernel threads 
      */
@@ -57,8 +60,9 @@ int Kernel_nn_concat::Run( RunContext &rcontext ) {
 #endif
     wait_threads();
 
-    // DEBUG
+#if defined(DUMP_LEVEL) && DUMP_LEVEL > 0
     dump_data( _kernel_name+"_o.dat", (char*)_output, _output_size, sizeof(float));
+#endif
 
     return 0;
 }
@@ -72,11 +76,13 @@ int Kernel_nn_concat::decode_fb_data(const Concat *opinfo) {
     get_otile_info( opinfo->otile() );
 
 
+#if LOG_LEVEL > 1
     /* Print decoded content on log file
      */
     logfs << "-------- Kernel_opinfo fb data decode result --------\n";
     logfs << "name           = " << _kernel_name << "\n";
     display_tile_info( logfs );
+#endif
    
     return 0;
 }
@@ -105,12 +111,14 @@ void Kernel_nn_concat::create_kernel_args_list(void)
      */
     int oC = _otinfo[0].dim[1]; // OFM ch size
 
+#if LOG_LEVEL > 1
     logfs << "kernel_nn_concat::create_kernel_args_list() debug\n";
     logfs << "oC = " << oC << "\n";
     logfs << "iC = [ ";
     for(auto a : _itinfo) {
         logfs << a.dim[1] << " ";
     }   logfs << "]\n";
+#endif
     
     /* Creates kernel argument list for CPU
      */
@@ -143,6 +151,7 @@ void Kernel_nn_concat::create_kernel_args_list(void)
 
 
 #if 1
+#if LOG_LEVEL > 1
     logfs << "---------------- Kernel_args list ---------------------\n";
     for(unsigned int j = 0; j < kernel_args_list.size(); j++) {
         auto a = kernel_args_list[ j ];
@@ -164,6 +173,7 @@ void Kernel_nn_concat::create_kernel_args_list(void)
             logfs << a.oti.dim[k] << ",";
         logfs << a.oti.dim.back() << "]\n";
     }
+#endif
 #endif
 
     return;
@@ -201,10 +211,12 @@ void Kernel_nn_concat::cpu_kernel_concat(
 ) {
 
     auto& args = kernel_args_list[ args_list_index ];
+#if LOG_LEVEL > 1
     logfs << "output = 0x" << std::setw(8) << std::setfill('0') << std::hex \
           << args.output << std::setfill(' ') << std::dec << "\n";
     logfs << "input  = 0x" << std::setw(8) << std::setfill('0') << std::hex \
           << args.input << std::setfill(' ') << std::dec << "\n";
+#endif
 
     int N = args.iti.dim[0];
     int C = args.iti.dim[1];

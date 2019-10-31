@@ -27,7 +27,9 @@ int Kernel_nn_output::preProc( const Instruction *inst ) {
 }
 
 int Kernel_nn_output::postProc(void) {
+#if LOG_LEVEL > 1
     logfs << "\n";
+#endif
     return 0;
 }
 
@@ -43,11 +45,13 @@ int Kernel_nn_output::decode_fb_data(const Output *opinfo) {
     get_itile_info( opinfo->itile() );
 
 
+#if LOG_LEVEL > 1
     /* Print decoded content on log file
      */
     logfs << "-------- Kernel_opinfo fb data decode result --------\n";
     logfs << "name           = " << _kernel_name << "\n";
     display_tile_info( logfs );
+#endif
     
     return 0;
 }

@@ -26,7 +26,9 @@ int Kernel_nn_memalloc::preProc( const Instruction *inst ) {
 }
 
 int Kernel_nn_memalloc::postProc(void) {
+#if LOG_LEVEL > 1
     logfs << "\n";
+#endif
     return 0;
 }
 
@@ -44,9 +46,11 @@ int Kernel_nn_memalloc::decode_fb_data(const MemAlloc *opinfo) {
     _total_buff_size = opinfo->total_buff_size();
 
 
+#if LOG_LEVEL > 1
     logfs << "-------- Kernel_opinfo fb data decode result --------\n";
     logfs << "name           = " << _kernel_name << "\n";
     logfs << "total_buf_size = " << _total_buff_size << "\n";
+#endif
     
     return 0;
 }

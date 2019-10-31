@@ -30,8 +30,10 @@ int Kernel_nn_conv::preProc( const Instruction *inst ) {
 }
 
 int Kernel_nn_conv::postProc(void) {
+#if LOG_LEVEL > 1
     logfs << "\n";
-
+#endif
+#if 0
     const char * tmp_char= _kernel_name.c_str();
     char  filename[200] ;
     sprintf(filename,"./to_mnist/%s_out.txt",tmp_char);
@@ -44,6 +46,7 @@ int Kernel_nn_conv::postProc(void) {
     }
 
     fclose(fp_tmp);
+#endif
 
     return 0;
 }
@@ -52,12 +55,13 @@ int Kernel_nn_conv::Run( RunContext &rcontext ) {
     _input  = (rcontext.main_buffer + _itinfo[0].mem_addr);
     _output = (rcontext.main_buffer + _otinfo[0].mem_addr);
 
-    // DEBUG
+#if defined(DUMP_LEVEL) && DUMP_LEVEL > 0
     dump_data( _kernel_name+"_i.dat", _input, _input_size, sizeof(float));
     dump_data( _kernel_name+"_w.dat", (char*)_weight, _weight_size, sizeof(float));
     dump_data( _kernel_name+"_b.dat", (char*)_bias, _bias_size, sizeof(float));
+#endif
     
-
+#if 0
     int img_n = _itinfo[0].dim[0];
     int img_c = _itinfo[0].dim[1];//1;
     int img_h = _itinfo[0].dim[2];//28;
@@ -133,6 +137,7 @@ int Kernel_nn_conv::Run( RunContext &rcontext ) {
 
     printf("finish gemm!!\n");
     delete [] weight_in_;
+#endif
 
     /* Generates kernel threiads 
      */
@@ -145,8 +150,10 @@ int Kernel_nn_conv::Run( RunContext &rcontext ) {
 #endif
     wait_threads();
 
+#if defined(DUMP_LEVEL) && DUMP_LEVEL > 0
     // DEBUG
     dump_data( _kernel_name+"_o.dat", (char*)_output, _output_size, sizeof(float));
+#endif
 
     return 0;
 }
@@ -179,12 +186,13 @@ int Kernel_nn_conv::decode_fb_data(const Conv *opinfo) {
     //arg.weight = _weight + t_weight_addr * i;
     //arg.bias   = _bias   + t_bias_addr;
 
-    printf("start gpu\n");
+    //printf("start gpu\n");
     //for(int iter= 0; iter<10;iter++)
     //    printf("%f          %f           %f\n",_input[iter],_weight[iter],_bias[iter]);
 
 
 
+#if LOG_LEVEL > 1
     /* Print decoded content on log file
      */
     logfs << "-------- Kernel_opinfo fb data decode result --------\n";
@@ -199,6 +207,7 @@ int Kernel_nn_conv::decode_fb_data(const Conv *opinfo) {
     logfs << "bias_size      = " << _bias_size << "\n";
     logfs << "relu_op_en     = " << _relu_op_en << "\n";
     display_tile_info( logfs );
+#endif
    
     return 0;
 }
@@ -242,9 +251,11 @@ void Kernel_nn_conv::create_kernel_args_list(
     int och_by_cpu = (oC * thread_ratio_cpu) / total_ratio;
     int och_by_gpu = oC - och_by_cpu;
 
+#if LOG_LEVEL > 1
     logfs << "kernel_nn_conv::create_kernel_args_list() debug\n";
     logfs << "oC = " << oC << "\toch_by_cpu = " << och_by_cpu\
           << "\toch_by_gpu = " << och_by_gpu << "\n";
+#endif
 
     int och_base_addr_cpu = 0;
     int och_base_addr_gpu = (oW * oH) * och_by_cpu;

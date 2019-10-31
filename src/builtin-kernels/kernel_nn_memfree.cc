@@ -26,7 +26,9 @@ int Kernel_nn_memfree::preProc( const Instruction *inst ) {
 }
 
 int Kernel_nn_memfree::postProc(void) {
+#if LOG_LEVEL > 1
     logfs << "\n";
+#endif
     return 0;
 }
 

@@ -411,7 +411,6 @@ void displayInfo(void)
     cl_int errNum;
     cl_uint numPlatforms;
     cl_platform_id * platformIds;
-    cl_context context = NULL;
 
 	// First, query the total number of platforms
     errNum = clGetPlatformIDs(0, NULL, &numPlatforms);
@@ -484,6 +483,8 @@ void displayInfo(void)
 		// Iterate through each device, displaying associated information
 		for (cl_uint j = 0; j < numDevices; j++)
 		{
+#if 0
+            // TODO: to enable this, remove a reason to make unnecessary compile warnnings
 			InfoDevice<cl_device_type>::display(
 				devices[j], 
 				CL_DEVICE_TYPE, 
@@ -795,7 +796,7 @@ void displayInfo(void)
 				devices[j], 
 				CL_DEVICE_EXTENSIONS, 
 				"CL_DEVICE_EXTENSIONS");
-
+#endif
 
 			std::cout << std::endl << std::endl;
 		}
@@ -807,8 +808,6 @@ void displayInfo(void)
 //
 int opencl_info()
 {
-    cl_context context = 0;
-
 	displayInfo();
 
     return 0;

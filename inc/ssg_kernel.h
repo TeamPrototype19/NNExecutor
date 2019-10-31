@@ -148,18 +148,48 @@ class ssg_kernel{
         ~ssg_kernel()
         {
             //opencl mem
-            if(buf_img !=NULL) clReleaseMemObject(buf_img);buf_img =NULL;
-            if(buf_col !=NULL) clReleaseMemObject(buf_col);buf_col =NULL;
-            if(buf_weight !=NULL) clReleaseMemObject(buf_weight);buf_weight=NULL;
-            if(buf_bias !=NULL) clReleaseMemObject(buf_bias);buf_bias =NULL;
-            if(buf_gemm !=NULL) clReleaseMemObject(buf_gemm);buf_gemm =NULL;
-            if(buf_maxpool !=NULL) clReleaseMemObject(buf_maxpool);buf_maxpool =NULL;
+            if(buf_img !=NULL) {
+                clReleaseMemObject(buf_img);
+                buf_img =NULL;
+            }
+            if(buf_col !=NULL) {
+                clReleaseMemObject(buf_col);
+                buf_col =NULL;
+            }
+            if(buf_weight !=NULL) {
+                clReleaseMemObject(buf_weight);
+                buf_weight=NULL;
+            }
+            if(buf_bias !=NULL) {
+                clReleaseMemObject(buf_bias);
+                buf_bias =NULL;
+            }
+            if(buf_gemm !=NULL) {
+                clReleaseMemObject(buf_gemm);
+                buf_gemm =NULL;
+            }
+            if(buf_maxpool !=NULL) {
+                clReleaseMemObject(buf_maxpool);
+                buf_maxpool =NULL;
+            }
 
             //c mem
-            if(img_in != NULL) delete[] img_in; img_in=NULL;
-            if(w_in != NULL) delete[] w_in; w_in=NULL;
-            if(col_in !=NULL) delete [] col_in; col_in=NULL;
-            if(b_in !=NULL) delete[] b_in ;b_in =NULL;
+            if(img_in != NULL) {
+                delete[] img_in;
+                img_in=NULL;
+            }
+            if(w_in != NULL) {
+                delete[] w_in;
+                w_in=NULL;
+            }
+            if(col_in !=NULL) {
+                delete [] col_in;
+                col_in=NULL;
+            }
+            if(b_in !=NULL) {
+                delete[] b_in;
+                b_in =NULL;
+            }
         }
         
         void get_cl_info();

@@ -7,8 +7,8 @@
 ./fchksnr -t to_mnist/ip2_o.dat   -r tv_mnist/tv_ip2_o.dat   -R to_mnist/report_ip2.txt
 ./fchksnr -t to_mnist/prob_o.dat  -r tv_mnist/tv_loss_o.dat  -R to_mnist/report_prob.txt
 
-echo "/*---------------------------------------------*" >  rpt_mnist.txt
-echo " * NN GRAPH ACCURACY CHECK REPORT              *" >> rpt_mnist.txt
+echo "/*---------------------------------------------------------------------------*" >  rpt_mnist.txt
+echo " * NN GRAPH ACCURACY CHECK REPORT                                            *" >> rpt_mnist.txt
 grep Final to_mnist/report_conv1.txt                    >> rpt_mnist.txt
 grep Final to_mnist/report_pool1.txt                    >> rpt_mnist.txt
 grep Final to_mnist/report_conv2.txt                    >> rpt_mnist.txt
@@ -17,6 +17,6 @@ grep Final to_mnist/report_ip1.txt                      >> rpt_mnist.txt
 grep Final to_mnist/report_relu1.txt                    >> rpt_mnist.txt
 grep Final to_mnist/report_ip2.txt                      >> rpt_mnist.txt
 grep Final to_mnist/report_prob.txt                     >> rpt_mnist.txt
-echo "/*---------------------------------------------*" >> rpt_mnist.txt
+echo " *---------------------------------------------------------------------------*/" >> rpt_mnist.txt
 
 more rpt_mnist.txt

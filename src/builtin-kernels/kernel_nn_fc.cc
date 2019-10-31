@@ -107,54 +107,40 @@ void Kernel_nn_fc::create_kernel_args_list(
 {
     assert( _itinfo.size() == 1 );
     assert( _otinfo.size() == 1 );
-    assert( _itinfo[0].dim.size() == 4 );
+    //assert( _itinfo[0].dim.size() == 4 );
     //assert( _otinfo[0].dim.size() == 4 );
     assert( _itinfo[0].dim[0] == 1 );
     assert( _otinfo[0].dim[0] == 1 );
 
     /* Check tile sizes
      */
-    int iC = _itinfo[0].dim[1]; // IFM ch size
-    int oN = _otinfo[0].dim[0]; // OFM num size
-    int oC = _otinfo[0].dim[1]; // OFM ch size
-    int oH, oW;
-    int kernel_size_h = _itinfo[0].dim[2];
-    int kernel_size_w = _itinfo[0].dim[3];
-    
-    assert( _otinfo[0].dim.size() == 4 || _otinfo[0].dim.size() == 2 );
-
-    if( _otinfo[0].dim.size() == 4 ) {
-        oH = _otinfo[0].dim[2]; // OFM height size
-        oW = _otinfo[0].dim[3]; // OFM width size
-    }
-    else if( _otinfo[0].dim.size() == 2 ) {
-        oH = 1;
-        oW = 1;
-    }
-
+    int iN = _itinfo[0].dim[0]; // IFM N
+    int oN = _otinfo[0].dim[0]; // IFM N
+    int ifm_size = _itinfo[0].total_size( _itinfo[0].dim ) / iN;
+    int ofm_size = _otinfo[0].total_size( _otinfo[0].dim ) / oN;
 
     /* Calculates each processing ratio of cpu/gpu
      */
     int total_ratio = thread_ratio_cpu + thread_ratio_gpu;
-    int och_by_cpu = (oC * thread_ratio_cpu) / total_ratio;
-    int och_by_gpu = oC - och_by_cpu;
+    int och_by_cpu = (ofm_size * thread_ratio_cpu) / total_ratio;
+    int och_by_gpu = ofm_size - och_by_cpu;
 
     logfs << "kernel_nn_fc::create_kernel_args_list() debug\n";
-    logfs << "oC = " << oC << "\toch_by_cpu = " << och_by_cpu\
-          << "\toch_by_gpu = " << och_by_gpu << "\n";
+    logfs << "och_by_cpu = " << och_by_cpu << "\toch_by_gpu = " << och_by_gpu << "\n";
+    logfs << "ifm_size   = " << ifm_size   << "\tofm_size   = " << ofm_size   << "\n";
 
     int och_base_addr_cpu = 0;
-    int och_base_addr_gpu = (oW * oH) * och_by_cpu;
+    int och_base_addr_gpu = och_by_cpu;
     int wgt_base_addr_cpu = 0;
-    int wgt_base_addr_gpu = (kernel_size_w * kernel_size_h) * iC * och_by_cpu;
+    int wgt_base_addr_gpu = ifm_size * och_by_cpu;
     int bias_base_addr_cpu = 0;
     int bias_base_addr_gpu = och_by_cpu;
 
     /* Creates kernel argument list for CPU
      */
     int och_per_Cthread = (och_by_cpu + (thread_num_cpu-1)) / thread_num_cpu;
-    int och_offset_per_Cthread = oN * (oH * oW) * och_per_Cthread * sizeof(float);
-    int wgt_offset_per_Cthread = (kernel_size_h * kernel_size_w) * iC * och_per_Cthread;
+    int och_offset_per_Cthread = och_per_Cthread * sizeof(float);
+    int wgt_offset_per_Cthread = ifm_size * och_per_Cthread;
     int bias_offset_per_Cthread = och_per_Cthread;
 
     int oC_org = och_by_cpu;
@@ -183,7 +169,7 @@ void Kernel_nn_fc::create_kernel_args_list(
     }
 
 
-#if 0
+#if 1
     logfs << "---------------- Kernel_args list ---------------------\n";
     logfs << "thread_num_cpu   = " << thread_num_cpu << "\n";
     logfs << "thread_num_gpu   = " << thread_num_gpu << "\n";
@@ -222,8 +208,8 @@ void Kernel_nn_fc::create_kernel_args_list(
     if( thread_ratio_gpu == 0 )
         return;
     int och_per_Gthread = (och_by_gpu + (thread_num_gpu-1)) / thread_num_gpu;
-    int och_offset_per_Gthread = oN * (oH * oW) * och_per_Gthread * sizeof(float);
-    int wgt_offset_per_Gthread = (kernel_size_h * kernel_size_w) * iC * och_per_Gthread;
+    int och_offset_per_Gthread = och_per_Gthread * sizeof(float);
+    int wgt_offset_per_Gthread = ifm_size * och_per_Gthread;
     int bias_offset_per_Gthread = och_per_Gthread;
 
     oC_org = och_by_gpu;
@@ -314,22 +300,23 @@ void Kernel_nn_fc::cpu_kernel_fc(
 ) {
 
     auto& args = kernel_args_list[ args_list_index ];
-    int N = args.iti.dim[0];
+    int iN = args.iti.dim[0];
+    int oN = args.oti.dim[0];
 
     int ifm_size = 1;
-    for(auto a : _itinfo[0].dim)
+    for(auto a : args.iti.dim)
         ifm_size *= a;
-    ifm_size /= N;
+    ifm_size /= iN;
 
     int ofm_size = 1;
-    for(auto a : _otinfo[0].dim)
+    for(auto a : args.oti.dim)
         ofm_size *= a;
-    ofm_size /= N;
+    ofm_size /= oN;
 
     float *input  = args.input;
     float *output = args.output;
 
-    for(int n = 0 ; n < N ; n++) {
+    for(int n = 0 ; n < oN ; n++) {
         float *weight = args.weight;
         float *bias   = args.bias;
         for(int o = 0 ; o < ofm_size ; o++) {

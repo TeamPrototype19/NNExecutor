@@ -8,13 +8,13 @@
 
 #include "log.h"
 #include "nnexec.hpp"
-#include "ssg_kernel.h"
 
 void readBinaryData(char* &buf, int &size, std::string filename);
 void writeBinaryData(char* &buf, int &size, std::string filename);
 
-int main(int argc, char **argv) {
- /*
+#if 1   // OpenCL Test code
+#include "ssg_kernel.h"
+void opencl_test_func(void) {
     int weight_h = 25;
     int weight_w = 30;
     int img_n =100;
@@ -34,10 +34,15 @@ int main(int argc, char **argv) {
     mkernel.get_cl_info();
     mkernel.init_device();
     mkernel.compile_program();
+}
+#endif
 
-*/
+int main(int argc, char **argv) {
 	char option;
 	const char *optstring = "p:i:o:r";
+
+    opencl_test_func();
+    return 1;
 
     open_log_file("log.txt");
 

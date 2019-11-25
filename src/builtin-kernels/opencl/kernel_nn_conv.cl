@@ -130,44 +130,6 @@ __kernel void im2col_gpu_kernel(const int img_n, const int img_c, const int img_
     }
 }
 
-// =================================================================================================
-__kernel void maxpool_gpu_kernel(const int col_height, const int col_h, const int col_w, const int img_c, const int kernel_size, 
-        __global float * data_col, __global float * max_pool_out)
-{
-    const int row = get_local_id(0);
-    const int col = get_local_id(1);
-    const int globalRow = get_global_id(0);
-    const int globalCol = get_global_id(1);
-
-    int img_n = col_height/(col_h*col_w);
-    int in_step = kernel_size * img_c;
-    int in_size = kernel_size * img_c*col_h*col_w;
-    int out_step = img_c;
-    int out_size = img_c * col_h*col_w;
-    int out_t_step = col_h*col_w;
-
-    for(int iter_n =0; iter_n<img_n ;iter_n++)
-    {
-        float max_val = -1.0;
-        for(int iter_row =0; iter_row < kernel_size;iter_row++) {
-            float tmp_val = data_col[globalRow*in_step + globalCol*kernel_size+iter_row+iter_n*in_size];
-            if(max_val < tmp_val)
-            max_val =tmp_val;
-
-        }
-
-        barrier(CLK_LOCAL_MEM_FENCE);
-        int col_index = globalRow*out_step+globalCol;
-
-        int row_t = col_index/out_step;
-        int col_t = col_index%out_step;
-        max_pool_out[col_t*out_t_step + row_t + iter_n*out_size] = max_val;
-
-        barrier(CLK_LOCAL_MEM_FENCE);
-    }
-}
-
-
 __kernel void myGEMM2(const int M, const int N, const int K,
                       const __global float* A,
                       const __global float* B,
